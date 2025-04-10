@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import math
+import mathh
 
 class FWICLASS:
   def __init__(self, temp, rhum, wind, prcp):
