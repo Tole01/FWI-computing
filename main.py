@@ -32,3 +32,9 @@ print("\n",ndvi)
 
 print("\n Slope:")
 print("\n",slope)
+
+#calcular riesgo de incendio
+
+risk = 0.3*indices['BUI']+0.3*ndvi+0.4*slope
+print("\n Riesgo de incendio:")
+print("\n",risk)
