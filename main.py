@@ -2,10 +2,19 @@ from Api_file import get_weather_data
 from Api_file import get_ndvi
 from Api_file import get_slope
 from computingFWI import calculate_fwi
+<<<<<<< Updated upstream
 
 # Coordenadas que se obtendran de ardupilot
 lat = 25.6866
 lon = -100.3161
+=======
+from coordinates import get_coordinates
+
+# Coordenadas que se obtendran de ardupilot
+lat, lon = get_coordinates()
+
+#API keys
+>>>>>>> Stashed changes
 api_key = 'd73f8f737d7728a9d2ea0ffcd8779ff2' #API OpenWeather
 MAPBOX_TOKEN = 'pk.eyJ1IjoiamFjb2JvMjciLCJhIjoiY204eW5maTdjMDMwODJqb293ZGd4cTNscSJ9.0_kcUB4XbYyrw3PPGT-QuQ'
 ZOOM = 15  # Quieres mayor o menor resolución
@@ -34,7 +43,10 @@ print("\n Slope:")
 print("\n",slope)
 
 #calcular riesgo de incendio
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 risk = 0.3*indices['BUI']+0.3*ndvi+0.4*slope
 print("\n Riesgo de incendio:")
 print("\n",risk)

@@ -8,7 +8,7 @@ from PIL import Image
 from io import BytesIO
 import math
 
-# Credenciales para Sentinel Hub
+# Credenciales para la API Sentinel Hub (NDVI)
 config = SHConfig()
 config.sh_client_id = 'c48dbe29-c5dc-4365-92c7-2e6d12099699'
 config.sh_client_secret = 'PkWmBXXsAZx7ROITjhHoYHgPbH5vfHG2'
@@ -33,7 +33,7 @@ function evaluatePixel(sample) {
   return [ndvi];
 }
 """
-
+#Funcion para obtener datos del clima mediante la API de OpenWeather
 def get_weather_data(lat, lon, api_key):
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
     data = requests.get(url).json()
@@ -53,6 +53,7 @@ def get_weather_data(lat, lon, api_key):
         'month': mes
     }
 
+#Funcion para obtener el NDVI mediante la API de Sentinel Hub
 def get_ndvi(lat, lon):
     bbox = BBox(bbox=[lon - 0.0005, lat - 0.0005, lon + 0.0005, lat + 0.0005], crs=CRS.WGS84)
     time_interval = ('2024-12-01', '2025-04-01')
@@ -80,6 +81,7 @@ def get_ndvi(lat, lon):
 
     return ndvi_mean
 
+#Funcion para obtener el slope mediante la API de Mapbox
 def latlon_to_tilexy(lat, lon, zoom):
     n = 2.0 ** zoom
     x_tile = int((lon + 180.0) / 360.0 * n)
