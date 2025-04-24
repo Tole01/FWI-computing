@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import cv2
 
 # Cargar modelo entrenado
-model = YOLO(r"C:\Users\jacob\Documents\itesm\8vo semestre\Bloque\Codigo\gti-cv-app\Models\fire_s.pt")
+model = YOLO(r"fire_s.pt")
 
 # Conectar a la cámara
 cap = cv2.VideoCapture(0)
