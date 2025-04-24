@@ -33,8 +33,13 @@ function evaluatePixel(sample) {
   return [ndvi];
 }
 """
-#Funcion para obtener datos del clima mediante la API de OpenWeather
+
 def get_weather_data(lat, lon, api_key):
+    """
+    Utiliza OpenWeatherMap para obtener datos del clima en una ubicación específica.
+    Retorna:
+        dict: Diccionario con datos del clima (temperatura, humedad, velocidad del viento, precipitación y mes actual).
+    """
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
     data = requests.get(url).json()
 
@@ -53,8 +58,13 @@ def get_weather_data(lat, lon, api_key):
         'month': mes
     }
 
-#Funcion para obtener el NDVI mediante la API de Sentinel Hub
+
 def get_ndvi(lat, lon):
+    """
+    Utiliza Sentinel Hub para obtener el NDVI en una ubicación específica.
+    Retorna:
+        float: Valor del NDVI.
+    """
     bbox = BBox(bbox=[lon - 0.0005, lat - 0.0005, lon + 0.0005, lat + 0.0005], crs=CRS.WGS84)
     time_interval = ('2024-12-01', '2025-04-01')
 
@@ -81,8 +91,17 @@ def get_ndvi(lat, lon):
 
     return ndvi_mean
 
-#Funcion para obtener el slope mediante la API de Mapbox
+
 def latlon_to_tilexy(lat, lon, zoom):
+    """
+    Convierte coordenadas de latitud y longitud a coordenadas de tile (x, y) para un nivel de zoom específico.
+    Args:
+        lat (float): Latitud en grados decimales.
+        lon (float): Longitud en grados decimales.
+        zoom (int): Nivel de zoom deseado.
+    Returns:
+        tuple: Coordenadas de tile (x, y).
+    """
     n = 2.0 ** zoom
     x_tile = int((lon + 180.0) / 360.0 * n)
     y_tile = int((1.0 - math.log(math.tan(math.radians(lat)) +
@@ -90,9 +109,28 @@ def latlon_to_tilexy(lat, lon, zoom):
     return x_tile, y_tile
 
 def decode_elevation(r, g, b):
+    """
+    Decodifica la elevación a partir de los valores RGB.
+    Args:
+        r (int): Valor del canal rojo.
+        g (int): Valor del canal verde.
+        b (int): Valor del canal azul.
+    Returns:
+        float: Elevación en metros.
+    """
     return -10000 + ((r * 256 * 256 + g * 256 + b) * 0.1)
 
 def get_tile_image(x_tile, y_tile, zoom, MAPBOX_TOKEN):
+    """
+    Obtiene la imagen del tile de Mapbox para las coordenadas y el nivel de zoom especificados.
+    Args:
+        x_tile (int): Coordenada x del tile.
+        y_tile (int): Coordenada y del tile.
+        zoom (int): Nivel de zoom.
+        MAPBOX_TOKEN (str): Token de acceso a la API de Mapbox.
+    Returns:
+        PIL.Image: Imagen del tile.
+    """
     url = f"https://api.mapbox.com/v4/mapbox.terrain-rgb/{zoom}/{x_tile}/{y_tile}.pngraw?access_token={MAPBOX_TOKEN}"
     response = requests.get(url)
     if response.status_code != 200:
@@ -101,6 +139,16 @@ def get_tile_image(x_tile, y_tile, zoom, MAPBOX_TOKEN):
     return image
 
 def get_slope(lat, lon, ZOOM, MAPBOX_TOKEN):
+    """
+    Calcula la pendiente del terreno en grados a partir de los valores RGB de un tile de Mapbox.
+    Args:
+        lat (float): Latitud en grados decimales.
+        lon (float): Longitud en grados decimales.
+        ZOOM (int): Nivel de zoom deseado.
+        MAPBOX_TOKEN (str): Token de acceso a la API de Mapbox.
+    Returns:
+        float: Pendiente en grados.
+    """
     x_tile, y_tile = latlon_to_tilexy(lat, lon, ZOOM)
     image = get_tile_image(x_tile, y_tile, ZOOM, MAPBOX_TOKEN)
     pixels = np.array(image)
