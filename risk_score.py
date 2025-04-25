@@ -11,7 +11,7 @@ def normalize(value, min_value, max_value):
     """
     return (value - min_value) / (max_value - min_value)
 
-def calculate_risk_score(ndvi, slope, thermal, bui, weights):
+def calculate_risk_score(ndvi, slope, thermal, bui):
     """
     Calcula el riesgo de incendio utilizando el índice de humedad del combustible (BUI), NDVI y la pendiente del terreno.
     Donde:
@@ -32,18 +32,31 @@ def calculate_risk_score(ndvi, slope, thermal, bui, weights):
     >>> calculate_risk_score(0.8, 30, 45, 50)
     1.0
     """
+    # Generate Data Frame
+    df = generate_dataFrame(ndvi, slope, thermal, bui)
+    # Normalize parameters
+    df_normalized = normalize_parameters(df)
+  
+    risk_score = sum([weights[column] * column for column in df_normalized.columns])
+    
+    return risk_score
+
+def generate_dataFrame(ndvi, slope, thermal, bui):
+    '''Generates a Pandas Dataframe storing sequential parameters'''
     df = pd.DataFrame({'NDVI': ndvi,
                        'Slope': slope,
                        'Thermal': thermal,
                        'BUI': bui
                         })
-    
-    # Normalize column parameters
+    return df
+
+def normalize_parameters(df):
+    """Normalize parameters for each row"""
     for column in df.columns:
         min_val, max_val = df[column].min(), df[column].max()
         df[column] = normalize(column, min_val, max_val)
-    
-    risk_score = sum([weights[column] * column for column in df.columns])
-    
-    return risk_score
+
+    return df
+
+
 
