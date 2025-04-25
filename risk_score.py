@@ -5,7 +5,10 @@ import pandas as pd
 weights = {'NDVI': 0.15, 'Slope': 0.20, 'Thermal': 0.30, 'BUI': 0.35}
 
 def normalize(value, min_value, max_value):
-    """Normalize a value to the range [0, 1]."""
+    """Normalize a value to the range [0, 1].
+    >>> normalize(35, 25, 45)
+    0.5
+    """
     return (value - min_value) / (max_value - min_value)
 
 def calculate_risk_score(ndvi, slope, thermal, bui, weights):
@@ -40,8 +43,7 @@ def calculate_risk_score(ndvi, slope, thermal, bui, weights):
         min_val, max_val = df[column].min(), df[column].max()
         df[column] = normalize(column, min_val, max_val)
     
-    # print(df)
     risk_score = sum([weights[column] * column for column in df.columns])
-    print(risk_score)
+    
     return risk_score
 
