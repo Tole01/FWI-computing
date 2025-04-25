@@ -3,10 +3,10 @@ from Api_file import get_ndvi
 from Api_file import get_slope
 from computingFWI import calculate_fwi
 from coordinates import get_coordinates
-from risk_score import get_risk_score
+from risk_score import calculate_risk_score
 
 # Coordenadas que se obtendran de ardupilot
-lat,lon = get_coordinates()
+lat,lon = 25.618611, -100.356977 #get_coordinates()
 
 #calorimetria
 T_max = 250 # Temperatura máxima en °C
@@ -39,5 +39,5 @@ print("\n Slope:")
 print("\n",slope)
 
 #calcular riesgo de incendio
-risk = get_risk_score(indices, ndvi, slope, T_max)
+risk = calculate_risk_score(indices, ndvi, slope, T_max)
 print(f"\n🔥 Risk Score: {risk:.2f}")
