@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 
+# Assigned weight to parameters
+weights = {'NDVI': 0.15, 'Slope': 0.20, 'Thermal': 0.30, 'BUI': 0.35}
+
 def normalize(value, min_value, max_value):
     """Normalize a value to the range [0, 1]."""
     return (value - min_value) / (max_value - min_value)
@@ -17,45 +20,28 @@ def calculate_risk_score(ndvi, slope, thermal, bui, weights):
     Retorna:
         risk_score: Puntuación de riesgo de incendio.  
     """
-    return (weights['ndvi'] * ndvi +
-            weights['slope'] * slope +
-            weights['thermal'] * thermal +
-            weights['bui'] * bui)
 
-
-def normalize_parameters(df):
-    '''Generate a normalized data frame from the cell parameters
+    """
+    >>> calculate_risk_score(0.4, 10, 25, 30)
+    0.0
+    >>> calculate_risk_score(0.6, 20, 35, 40)
+    0.5 
+    >>> calculate_risk_score(0.8, 30, 45, 50)
+    1.0
+    """
+    df = pd.DataFrame({'NDVI': ndvi,
+                       'Slope': slope,
+                       'Thermal': thermal,
+                       'BUI': bui
+                        })
     
-    Input: 
-        df: pandas dataframe containing the parameters used for the risk score calculation
-    
-    Output:
-        df: normalized DataFrame for each parameter'''
-
+    # Normalize column parameters
     for column in df.columns:
-        df[f'{column}_normalized'] = normalize(df[column], df[column].min(), df[column].max())
+        min_val, max_val = df[column].min(), df[column].max()
+        df[column] = normalize(column, min_val, max_val)
     
-    return df
+    # print(df)
+    risk_score = sum([weights[column] * column for column in df.columns])
+    print(risk_score)
+    return risk_score
 
-# Set initial equal weights
-weights = {'ndvi': 0.15, 'slope': 0.20, 'thermal': 0.30, 'bui': 0.35}
-
-# Example input data
-df = pd.DataFrame({
-    'NDVI': [0.4, 0.6, 0.8],
-    'Slope': [10, 20, 30],
-    'Thermal': [25, 35, 45],
-    'BUI': [30, 40, 50]
-})
-
-# Normalize DataFrame
-df = normalize_parameters(df)
-df['Risk_Score'] = df.apply(lambda row: calculate_risk_score(
-    row['NDVI_normalized'],
-    row['Slope_normalized'],
-    row['Thermal_normalized'],
-    row['BUI_normalized'],
-    weights
-), axis=1)
-
-print(df[['NDVI', 'Slope', 'Thermal', 'BUI', 'Risk_Score']])
