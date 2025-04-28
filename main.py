@@ -12,12 +12,8 @@ lat,lon = 25.618611, -100.356977 #get_coordinates()
 T = 30 # Temperatura de la coordenada a evaluar
 T_norm = (T+10)/(140+10) # Normalización de la temperatura máxima
 
-api_key = 'd73f8f737d7728a9d2ea0ffcd8779ff2' #API OpenWeather
-MAPBOX_TOKEN = 'pk.eyJ1IjoiamFjb2JvMjciLCJhIjoiY204eW5maTdjMDMwODJqb293ZGd4cTNscSJ9.0_kcUB4XbYyrw3PPGT-QuQ'
-ZOOM = 15  # Quieres mayor o menor resolución
-
 # Obtener datos del clima
-row = get_weather_data(lat, lon, api_key)
+row = get_weather_data(lat, lon)
 
 # Calcular FWI
 indices = calculate_fwi(row)
@@ -26,7 +22,7 @@ indices = calculate_fwi(row)
 ndvi = get_ndvi(lat,lon)
 
 #Calcular slope
-slope = get_slope(lat, lon, ZOOM, MAPBOX_TOKEN)
+slope = get_slope(lat, lon)
 
 # Mostrar resultados
 print("\n📊 Resultados FWI:")

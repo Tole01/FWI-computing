@@ -34,12 +34,13 @@ function evaluatePixel(sample) {
 }
 """
 
-def get_weather_data(lat, lon, api_key):
+def get_weather_data(lat, lon):
     """
     Utiliza OpenWeatherMap para obtener datos del clima en una ubicación específica.
     Retorna:
         dict: Diccionario con datos del clima (temperatura, humedad, velocidad del viento, precipitación y mes actual).
     """
+    api_key = 'd73f8f737d7728a9d2ea0ffcd8779ff2' #API OpenWeather
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
     data = requests.get(url).json()
 
@@ -139,7 +140,7 @@ def get_tile_image(x_tile, y_tile, zoom, MAPBOX_TOKEN):
     image = Image.open(BytesIO(response.content))
     return image
 
-def get_slope(lat, lon, ZOOM, MAPBOX_TOKEN):
+def get_slope(lat, lon):
     """
     Calcula la pendiente del terreno en grados a partir de los valores RGB de un tile de Mapbox.
     Args:
@@ -150,6 +151,8 @@ def get_slope(lat, lon, ZOOM, MAPBOX_TOKEN):
     Returns:
         float: Pendiente en grados.
     """
+    MAPBOX_TOKEN = 'pk.eyJ1IjoiamFjb2JvMjciLCJhIjoiY204eW5maTdjMDMwODJqb293ZGd4cTNscSJ9.0_kcUB4XbYyrw3PPGT-QuQ'
+    ZOOM = 15  # Quieres mayor o menor resolución
     x_tile, y_tile = latlon_to_tilexy(lat, lon, ZOOM)
     image = get_tile_image(x_tile, y_tile, ZOOM, MAPBOX_TOKEN)
     pixels = np.array(image)
