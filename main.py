@@ -9,7 +9,8 @@ from risk_score import calculate_risk_score
 lat,lon = 25.618611, -100.356977 #get_coordinates()
 
 #calorimetria
-T_max = 250 # Temperatura máxima en °C
+T = 30 # Temperatura de la coordenada a evaluar
+T_norm = (T+10)/(140+10) # Normalización de la temperatura máxima
 
 api_key = 'd73f8f737d7728a9d2ea0ffcd8779ff2' #API OpenWeather
 MAPBOX_TOKEN = 'pk.eyJ1IjoiamFjb2JvMjciLCJhIjoiY204eW5maTdjMDMwODJqb293ZGd4cTNscSJ9.0_kcUB4XbYyrw3PPGT-QuQ'
@@ -39,5 +40,5 @@ print("\n Slope:")
 print("\n",slope)
 
 #calcular riesgo de incendio
-risk = calculate_risk_score(indices, ndvi, slope, T_max)
+risk = calculate_risk_score(indices, ndvi, slope, T_norm)
 print(f"\n🔥 Risk Score: {risk:.2f}")

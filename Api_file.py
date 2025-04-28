@@ -89,8 +89,9 @@ def get_ndvi(lat, lon):
     ndvi_array = response[0]
     ndvi_mean = float(np.nanmean(ndvi_array))
 
-    return ndvi_mean
+    ndvi_normalized = (ndvi_mean + 1) / 2  # Normalizar NDVI entre 0 y 1
 
+    return ndvi_normalized
 
 def latlon_to_tilexy(lat, lon, zoom):
     """
@@ -169,4 +170,6 @@ def get_slope(lat, lon, ZOOM, MAPBOX_TOKEN):
     slope_rad = math.atan(math.sqrt(dz_dx**2 + dz_dy**2))
     slope_deg = math.degrees(slope_rad)
 
-    return slope_deg
+    slope_normalized = slope_deg / 90.0  # Normalizar entre 0 y 1
+
+    return slope_normalized
