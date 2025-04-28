@@ -157,7 +157,8 @@ class FWICLASS:
     if bui < 0.0:
       bui = 0.0
     # print('BUI:', bui)
-    return bui
+    normalized_bui = bui / 250  # Normalizar BUI a un rango de 0 a 1
+    return normalized_bui
 
   # Verificado
   def FWIcalc(self, isi, bui):
