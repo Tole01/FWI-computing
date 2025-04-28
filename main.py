@@ -4,6 +4,10 @@ from Api_file import get_slope
 from computingFWI import calculate_fwi
 from coordinates import get_coordinates
 from risk_score import calculate_risk_score
+from deteccion_incendio import detect_fire
+
+fire = 0 # Variable para indicar si hay fuego o no
+detect_fire(fire) # Loop que busca fuego en las dos camaras, si no hay fuego se queda en el loop
 
 # Coordenadas que se obtendran de ardupilot
 lat,lon = 25.618611, -100.356977 #get_coordinates()
