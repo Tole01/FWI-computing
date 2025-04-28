@@ -3,6 +3,7 @@ from Api_file import get_ndvi
 from Api_file import get_slope
 from computingFWI import calculate_fwi
 from coordinates import get_coordinates
+from coordinates import pixel_to_gps
 from risk_score import calculate_risk_score
 from deteccion_incendio import detect_fire
 import cv2
