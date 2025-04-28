@@ -6,13 +6,18 @@ from coordinates import get_coordinates
 from coordinates import pixel_to_gps
 from risk_score import calculate_risk_score
 from deteccion_incendio import detect_fire
+from mesh_analysis import mesh_segmentation as seg
 import cv2
+
 
 fire = 0 # Variable para indicar si hay fuego o no
 fire_img = detect_fire(fire) # Loop que busca fuego en las dos camaras, guarda la imagen optica con fuego
-cv2.imshow("Imagen Óptica Capturada", fire_img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+seg(fire_img)
+# cv2.imshow("Imagen Óptica Capturada", fire_img)
+# Generar análisis de malla a partir de imagen
+
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 # Coordenadas que se obtendran de ardupilot
 lat,lon = 25.618611, -100.356977 #get_coordinates()
 
