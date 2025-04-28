@@ -11,6 +11,8 @@ def detect_fire(fire):
     
     Returns:
         img_optica (numpy array): Imagen de la cámara en el momento de detección.
+        cx (int): Coordenada x del centroide del fuego.
+        cy (int): Coordenada y del centroide del fuego.
     """
     model = YOLO(r"fire_s.pt")
     cap = cv2.VideoCapture(0)
@@ -57,4 +59,4 @@ def detect_fire(fire):
     cap.release()
     cv2.destroyAllWindows()
 
-    return img_optica
+    return img_optica,cx,cy
