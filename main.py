@@ -21,10 +21,13 @@ cv2.destroyAllWindows()
 # Coordenadas que se obtendran de ardupilot
 drone_lat,drone_lon,drone_height = 25.618611, -100.356977,35 #get_coordinates()
 
-#dividir foto y obtener lista de coordenadas
+#dividir foto
 
-# Coordenadas de la imagen transformadas a GPS
-lat, lon = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,150,140)
+# Coordenadas de la imagen
+lat, lon = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)
+
+# Coordenadas del incendio
+lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)
 
 #obtener temperatura de cada coordenada (en pixel)
 T = 30 # Temperatura de la coordenada a evaluar
@@ -42,7 +45,7 @@ ndvi = get_ndvi(lat,lon)
 #Calcular slope
 slope = get_slope(lat, lon)
 
-print(f"\nIncendio en: ({lat:.6f}, {lon:.6f})")
+print(f"\nIncendio en: ({lat_fire:.6f}, {lon_fire:.6f})")
 
 #calcular riesgo de incendio
 risk = calculate_risk_score(indices, ndvi, slope, T_norm)
