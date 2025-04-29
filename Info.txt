@@ -7,3 +7,4 @@ A 30m de altura una imagen cubre aproximadamente 36736 m2
 
 Se divide la imagen en 336 celdas en un arreglo de [24 x 14]
 
+la camara termica tiene un rango de -10 grados a 140 grados
