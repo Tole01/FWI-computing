@@ -1,0 +1,9 @@
+El area de los cuadrados utilizados para calcular la pendiente es de 194.4 m2
+El area de los cuadrados utilizados para calcular el ndvi es de 111.36 m2
+
+La camara walksanil moonlight tiene un FOV diagonal de 160, y ratio de 16:9
+
+A 30m de altura una imagen cubre aproximadamente 36736 m2
+
+Se divide la imagen en 336 celdas en un arreglo de [24 x 14]
+
