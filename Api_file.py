@@ -66,7 +66,7 @@ def get_ndvi(lat, lon):
     Retorna:
         float: Valor del NDVI.
     """
-    bbox = BBox(bbox=[lon - 0.0005, lat - 0.0005, lon + 0.0005, lat + 0.0005], crs=CRS.WGS84)
+    bbox = BBox(bbox=[lon - 0.00005, lat - 0.00005, lon + 0.00005, lat + 0.00005], crs=CRS.WGS84)
     time_interval = ('2024-12-01', '2025-04-01')
 
     request = SentinelHubRequest(
