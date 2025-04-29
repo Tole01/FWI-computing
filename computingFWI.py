@@ -2,6 +2,37 @@ import pandas as pd
 import numpy as np
 import math
 
+class meshCell:
+  '''
+  Represents an individual cell from the total mesh analysis. Each cell has the following attributes:
+
+    lat -> Actual GPS latitude of the cell centroid coordinate
+    lon -> Actual GPS longitude of the cell centroid coordinate
+    ndvi -> Normalized difference vegetation index
+    slope -> Slope of terrain
+    thermal -> Max temperature inside cell
+    bui -> Build-up index
+    risk -> Computed risk score for the cell
+    classf -> Risk classification assigned from score 
+    
+  '''
+  def __init__(self, lat, lon, row, col):
+    self.row, self.col = row, col
+    self.lat = lat
+    self.lon = lon
+    self.ndvi = None
+    self.slope = None
+    self.thermal = None
+    self.bui = None
+    self.risk = None
+    self.classf = None
+  
+  # String representation
+  def __str__(self):
+    return f'Cell -> Row:[{self.row}] Col:[{self.col}]'
+  
+
+  
 class FWICLASS:
   def __init__(self, temp, rhum, wind, prcp):
     self.t = temp  # temperatura en Celsius
