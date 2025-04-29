@@ -23,7 +23,7 @@ drone_lat,drone_lon,drone_height = 25.618611, -100.356977,35 #get_coordinates()
 
 #dividir foto
 
-# Coordenadas de la imagen
+# Coordenadas del centroide del fuego detectado
 lat, lon = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)
 
 # Coordenadas del incendio
@@ -38,6 +38,7 @@ row = get_weather_data(lat, lon)
 
 # Calcular FWI
 indices = calculate_fwi(row)
+BUI = indices['BUI']
 
 #Calcular NDVI
 ndvi = get_ndvi(lat,lon)
@@ -48,5 +49,5 @@ slope = get_slope(lat, lon)
 print(f"\nIncendio en: ({lat_fire:.6f}, {lon_fire:.6f})")
 
 #calcular riesgo de incendio
-risk = calculate_risk_score(indices, ndvi, slope, T_norm)
+risk = calculate_risk_score(ndvi, slope, T_norm, BUI)
 print(f"\n🔥 Risk Score: {risk:.4f}")

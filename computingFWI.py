@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import math
+from risk_score import calculate_risk_score
+from Api_file import get_weather_data, get_ndvi, get_slope
 
 class meshCell:
   '''
@@ -20,19 +22,59 @@ class meshCell:
     self.row, self.col = row, col
     self.lat = lat
     self.lon = lon
+    self.weather = None
     self.ndvi = None
     self.slope = None
-    self.thermal = None
+    self.thermal = 100 ## Aun no hay codigo para este valor
     self.bui = None
     self.risk = None
-    self.classf = None
+    self.clasif = None
   
-  # String representation
   def __str__(self):
-    return f'Cell -> Row:[{self.row}] Col:[{self.col}]'
+    '''
+    String representation for the object. 
+
+    Ex: Cell -> Row:[0]Col:[1]
+    '''
+    return f'Cell -> Row:[{self.row}]Col:[{self.col}]'
   
+  def compute_indices(self):
+    ''''
+    Compute indices of the cell from the latitude and longitude attributes.
+    '''
+    try: 
+      self.weather = get_weather_data(self.lat, self.lon)
+      self.ndvi = get_ndvi(self.lat, self.lon)
+      self.slope = get_slope(self.lat, self.lon)
+      self.bui = calculate_fwi(self.weather)['BUI']
+    except: 
+      raise TypeError('Unable to compute cell indices')
+
+    return self.ndvi, self.slope, self.thermal, self.bui
+
+  def compute_riskScore(self):
+    '''
+    Computes risk score from instance attributes
+
+    Value ranges from 0.0 (min) - 1.0 (max)
+    '''
+    return calculate_risk_score(self.ndvi, self.slope, self.thermal, self.bui)
+  
+  def compute_clasif(self):
+    '''
+    Classifies cell risk from score and assings a color for visualization. 
+    '''
+    if (self.risk > 0.0) and (self.risk <= 0.4):
+      self.clasif = 'green'
+    elif (self.risk > 0.4) and (self.risk <= 0.7):
+      self.clasif = 'yellow'
+    else: 
+      self.clasif = 'red'
+    
+    return self.clasif
 
   
+      
 class FWICLASS:
   def __init__(self, temp, rhum, wind, prcp):
     self.t = temp  # temperatura en Celsius
