@@ -38,7 +38,7 @@ def generate_dataFrame(ndvi, slope, thermal, bui):
                        'Slope': slope,
                        'Thermal': thermal,
                        'BUI': bui
-                        })
+                        }, index=[0])
     return df
 
 

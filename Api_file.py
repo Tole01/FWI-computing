@@ -120,7 +120,11 @@ def decode_elevation(r, g, b):
     Returns:
         float: Elevación en metros.
     """
-    return -10000 + ((r * 256 * 256 + g * 256 + b) * 0.1)
+    # Overflow management / Clamp values from 0-255
+    r = max(0, min(255, r))
+    g = max(0, min(255, g))
+    b = max(0, min(255, b))
+    return -10000 + ((r * 255 * 255 + g * 255 + b) * 0.1)
 
 def get_tile_image(x_tile, y_tile, zoom, MAPBOX_TOKEN):
     """
@@ -137,8 +141,8 @@ def get_tile_image(x_tile, y_tile, zoom, MAPBOX_TOKEN):
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"Error al obtener tile: {response.status_code}")
-    image = Image.open(BytesIO(response.content))
-    return image
+    image = Image.open(BytesIO(response.content)).convert("RGB")
+    return np.array(image, dtype=np.uint8)
 
 def get_slope(lat, lon):
     """
@@ -165,6 +169,7 @@ def get_slope(lat, lon):
             px = center + dx
             py = center + dy
             r, g, b = pixels[py, px][:3]
+            # print(f'r: {r}, g: {g}, b: {b}')
             Z[dy + 1, dx + 1] = decode_elevation(r, g, b)
 
     dz_dx = ((Z[0,2] + 2*Z[1,2] + Z[2,2]) - (Z[0,0] + 2*Z[1,0] + Z[2,0])) / 8.0

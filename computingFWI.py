@@ -58,7 +58,8 @@ class meshCell:
 
     Value ranges from 0.0 (min) - 1.0 (max)
     '''
-    return calculate_risk_score(self.ndvi, self.slope, self.thermal, self.bui)
+    self.risk = calculate_risk_score(self.ndvi, self.slope, self.thermal, self.bui)
+    return self.risk
   
   def compute_clasif(self):
     '''
