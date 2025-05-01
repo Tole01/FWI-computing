@@ -11,7 +11,7 @@ class TestMeshAnalysis(unittest.TestCase):
     def test_mesh_segmentation(self):
         # Test mesh_segmentation with the dummy image
         try:
-            mesh_segmentation(self.image, resolution=120)
+            mesh_segmentation(self.image)
         except Exception as e:
             self.fail(f"mesh_segmentation raised an exception: {e}")
 

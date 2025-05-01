@@ -6,13 +6,11 @@ from coordinates import get_coordinates
 from coordinates import pixel_to_gps
 from risk_score import calculate_risk_score
 from deteccion_incendio import detect_fire
-#from mesh_analysis import mesh_segmentation as seg
 import cv2
 
 
 fire = 0 # Variable para indicar si hay fuego o no
 fire_img,cx,cy = detect_fire(fire) # Loop que busca fuego en las dos camaras, guarda la imagen optica con fuego
-#seg(fire_img)
 
 cv2.imshow("Imagen Óptica Capturada", fire_img)
 cv2.waitKey(0)
@@ -21,13 +19,19 @@ cv2.destroyAllWindows()
 # Coordenadas que se obtendran de ardupilot
 drone_lat,drone_lon,drone_height = 25.618611, -100.356977,35 #get_coordinates()
 
-#dividir foto
-
-# Coordenadas del centroide del fuego detectado
+# Coordenadas del centroide del fuego detectado 
 lat, lon = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)
 
-# Coordenadas del incendio
+# Coordenadas del incendio -> Input para EQUIPO 2
 lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)
+
+# Análisis de Mallado
+
+# Visualización del Análisis de Riesgo
+
+# Comunicación con la nube / Aplicación WEB
+
+
 
 #obtener temperatura de cada coordenada (en pixel)
 T = 30 # Temperatura de la coordenada a evaluar

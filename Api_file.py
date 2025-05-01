@@ -123,7 +123,12 @@ def decode_elevation(r, g, b):
     # Overflow management / Clamp values from 0-255
     r = max(0, min(255, r))
     g = max(0, min(255, g))
-    b = max(0, min(255, b))
+    b = max(0, min(255, b))  
+    # Cast to int32 to prevent overflow during multiplication
+    r = np.int32(r)
+    g = np.int32(g)
+    b = np.int32(b)
+
     return -10000 + ((r * 255 * 255 + g * 255 + b) * 0.1)
 
 def get_tile_image(x_tile, y_tile, zoom, MAPBOX_TOKEN):

@@ -19,14 +19,10 @@ class meshCell:
     
   '''
   def __init__(self, lat, lon, row, col):
-    self.row, self.col = row, col
+    self.pos = (row, col)
     self.lat = lat
     self.lon = lon
-    self.weather = None
-    self.ndvi = None
-    self.slope = None
-    self.thermal = 100 ## Aun no hay codigo para este valor
-    self.bui = None
+    self.indices = {}
     self.risk = None
     self.clasif = None
   
@@ -36,21 +32,20 @@ class meshCell:
 
     Ex: Cell -> Row:[0]Col:[1]
     '''
-    return f'Cell -> Row:[{self.row}]Col:[{self.col}]'
+    return f'Cell -> Row:[{self.row[0]}]Col:[{self.col[1]}]'
   
   def compute_indices(self):
     ''''
     Compute indices of the cell from the latitude and longitude attributes.
     '''
-    try: 
-      self.weather = get_weather_data(self.lat, self.lon)
-      self.ndvi = get_ndvi(self.lat, self.lon)
-      self.slope = get_slope(self.lat, self.lon)
-      self.bui = calculate_fwi(self.weather)['BUI']
-    except: 
-      raise TypeError('Unable to compute cell indices')
+    self.indices['weather'] = get_weather_data(self.lat, self.lon)
+    self.indices['ndvi'] = get_ndvi(self.lat, self.lon)
+    self.indices['slope'] = get_slope(self.lat, self.lon)
+    self.indices['thermal'] = 0.5 # No hay codigo para este valor todavía
+    self.indices['bui'] = calculate_fwi(self.indices['weather'])['BUI']
 
-    return self.ndvi, self.slope, self.thermal, self.bui
+    return self.indices
+    
 
   def compute_riskScore(self):
     '''
@@ -58,7 +53,8 @@ class meshCell:
 
     Value ranges from 0.0 (min) - 1.0 (max)
     '''
-    self.risk = calculate_risk_score(self.ndvi, self.slope, self.thermal, self.bui)
+    self.risk = calculate_risk_score(self.indices['ndvi'], self.indices['slope'], self.indices['thermal'], self.indices['bui'])
+
     return self.risk
   
   def compute_clasif(self):
