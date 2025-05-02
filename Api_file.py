@@ -10,9 +10,9 @@ import math
 
 # Credenciales para la API Sentinel Hub (NDVI)
 config = SHConfig()
-config.sh_client_id = 'c48dbe29-c5dc-4365-92c7-2e6d12099699'
-config.sh_client_secret = 'PkWmBXXsAZx7ROITjhHoYHgPbH5vfHG2'
-config.instance_id = '098c8ff2-731c-4b1c-9581-a69041518609'
+config.sh_client_id = '590548f9-918d-4f36-83ad-e36f60cdb9b2'
+config.sh_client_secret = 'PNvCEtDi7XxbE6dSOqBrnQaGhjgaG1k4'
+config.instance_id = '013ae883-0246-47b8-8fb6-8de30e43ec3f'
 
 # Evalscript para NDVI
 evalscript_ndvi = """
