@@ -4,9 +4,9 @@ from computingFWI import meshCell
 from coordinates import pixel_to_gps
 
 # Camera resolution parameters (substitute for Walksnail Moonlight)
-img_width, img_height, fov_x_deg, fov_y_deg = 1920, 1080, 160, 90
+img_width, img_height, fov_x_deg, fov_y_deg = 3840, 2160, 157, 140
 # Drone Coordinates (substitue for real-time flight)
-drone_lat, drone_lon, height_m = 25.618611, -100.356977, 100
+drone_lat, drone_lon, height_m = 25.61861, -100.35697, 50
 
 
 def mesh_segmentation(image, x_resolution = 240, y_resolution = 360):

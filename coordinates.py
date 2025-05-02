@@ -72,4 +72,5 @@ def pixel_to_gps(pixel_x, pixel_y, img_width, img_height, height_m, drone_lat, d
     new_lat = drone_lat + delta_lat
     new_lon = drone_lon + delta_lon
 
-    return new_lat, new_lon
+    # Rounds up to a precision of 5 decimal places (1.11 m)
+    return round(new_lat, 5), round(new_lon, 5)

@@ -39,10 +39,10 @@ class meshCell:
     Compute indices of the cell from the latitude and longitude attributes.
     '''
     self.indices['weather'] = get_weather_data(self.lat, self.lon)
-    self.indices['ndvi'] = get_ndvi(self.lat, self.lon)
-    self.indices['slope'] = get_slope(self.lat, self.lon)
+    self.indices['ndvi'] = round( get_ndvi(self.lat, self.lon) , 5)
+    self.indices['slope'] = round( get_slope(self.lat, self.lon) , 5)
     self.indices['thermal'] = 0.5 # No hay codigo para este valor todavía
-    self.indices['bui'] = calculate_fwi(self.indices['weather'])['BUI']
+    self.indices['bui'] = round( calculate_fwi(self.indices['weather'])['BUI'] , 5) 
 
     return self.indices
     
