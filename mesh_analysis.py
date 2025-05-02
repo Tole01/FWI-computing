@@ -4,23 +4,23 @@ from computingFWI import meshCell
 from coordinates import pixel_to_gps
 
 # Camera resolution parameters (substitute for Walksnail Moonlight)
-img_width, img_height, fov_x_deg, fov_y_deg = 3840, 2160, 157, 140
-# Drone Coordinates (substitue for real-time flight)
-drone_lat, drone_lon, height_m = 25.61861, -100.35697, 50
+fov_x_deg, fov_y_deg = 157, 140
 
-
-def mesh_segmentation(image, x_resolution = 240, y_resolution = 360):
+def mesh_segmentation(image, drone_lat, drone_lon, height_m, x_resolution = 240, y_resolution = 360):
     '''Generates a mesh of a specified cell number according to the chosen resolution, and 
      computes the parameters and risk score for each cell.
      
      Input: 
-        image           -> frame captured by optical camera
+        image           -> frame captured by optical camera (NumPy Array)
         x_resolution    -> pixel resolution for the x axis
         y_resolution    -> pixel resolution for the y axis
 
     Output: 
         mesh            -> Array of arrays, where each element represents a cell object.
        '''
+    
+    img_height, img_width, channels = image.shape
+
     x_columns, y_rows = (1920 // x_resolution), (1080 // y_resolution)
     
     mesh = [[None for _ in range(x_columns + 1)] for _ in range(y_rows + 1)]
@@ -42,7 +42,7 @@ def mesh_segmentation(image, x_resolution = 240, y_resolution = 360):
                     print(f'-> {index} value: {val}')
 
                 cell.compute_riskScore()
-                print(f'{cell.risk:.2f}')
+                print(f'{cell.risk:.3f}')
             except Exception as e:
                 print(f'There was an error computing the indexes: {e}')
                 quit()
@@ -53,7 +53,6 @@ def mesh_segmentation(image, x_resolution = 240, y_resolution = 360):
     print(mesh[2][3].risk)
 
     return mesh
-
 
 
 

@@ -39,10 +39,10 @@ class meshCell:
     Compute indices of the cell from the latitude and longitude attributes.
     '''
     self.indices['weather'] = get_weather_data(self.lat, self.lon)
-    self.indices['ndvi'] = round( get_ndvi(self.lat, self.lon) , 5)
-    self.indices['slope'] = round( get_slope(self.lat, self.lon) , 5)
+    self.indices['ndvi'] = get_ndvi(self.lat, self.lon)
+    self.indices['slope'] = get_slope(self.lat, self.lon)
     self.indices['thermal'] = 0.5 # No hay codigo para este valor todavía
-    self.indices['bui'] = round( calculate_fwi(self.indices['weather'])['BUI'] , 5) 
+    self.indices['bui'] = calculate_fwi(self.indices['weather'])['BUI']
 
     return self.indices
     
@@ -53,8 +53,9 @@ class meshCell:
 
     Value ranges from 0.0 (min) - 1.0 (max)
     '''
-    self.risk = calculate_risk_score(self.indices['ndvi'], self.indices['slope'], self.indices['thermal'], self.indices['bui'])
-
+    self.risk = round(
+                  calculate_risk_score(self.indices['ndvi'], self.indices['slope'], self.indices['thermal'], self.indices['bui']), 5)
+            
     return self.risk
   
   def compute_clasif(self):
