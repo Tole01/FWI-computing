@@ -41,3 +41,4 @@ temperature_matrix = [[100,80,40,40,80,60,30,30,30,95,90,100,100,25,25,25],
 # Visualización del Análisis de Riesgo
 
 # Comunicación con la nube / Aplicación WEB
+#👁️👄👁️
