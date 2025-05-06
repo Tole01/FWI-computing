@@ -31,3 +31,19 @@ def normalize_temperature(matrix):
     normalized_matrix = [[(temp - min_temp) / (max_temp - min_temp) for temp in row] for row in matrix]
 
     return normalized_matrix
+
+
+
+"""
+T = get_img(void)
+Retorna una matriz de temperaturas de 160x120
+Se conceta a la camara termica y obtiene la imagen
+
+T_max = get_max_temp(T)
+Retorna una matriz de temperaturas de 16 x 9
+Junta pixeles de la camara termica, calcula el maximo de cada bloque y lo guarda en la matriz
+
+Temp = get_temperature(row, column)
+Retorna la temperatura de la matriz de temperaturas maximas en la posicion row,column
+Se llama desde el mesh analysis para guardar la temperatura de cada celda
+"""

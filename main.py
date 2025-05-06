@@ -6,6 +6,7 @@ from coordinates import get_coordinates
 from coordinates import pixel_to_gps
 from risk_score import calculate_risk_score
 from deteccion_incendio import detect_fire
+from mesh_analysis import mesh_segmentation
 import cv2
 
 fire = 0 # Variable para indicar si hay fuego o no
@@ -37,7 +38,8 @@ temperature_matrix = [[100,80,40,40,80,60,30,30,30,95,90,100,100,25,25,25],
 ] # Matriz de temperaturas de ejemplo
 
 # Análisis de Mallado
-
+mallado = mesh_segmentation(fire_img, drone_lat, drone_lon, drone_height)
 # Visualización del Análisis de Riesgo
 
 # Comunicación con la nube / Aplicación WEB
+print(mallado)
