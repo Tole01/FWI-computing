@@ -17,7 +17,7 @@ cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 # Coordenadas que se obtendran de ardupilot
-drone_lat,drone_lon,drone_height = 25.618611, -100.356977,35 #get_coordinates()
+drone_lat,drone_lon,drone_height = 34.191763, -118.133088, 30 #get_coordinates()
 
 # Coordenadas del centroide del fuego detectado 
 lat, lon = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)

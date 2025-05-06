@@ -1,5 +1,6 @@
 import cv2
 from ultralytics import YOLO
+import time
 
 def detect_fire(fire):
     """
@@ -29,9 +30,10 @@ def detect_fire(fire):
             break
 
         # Ejecutar inferencia
-        results = model(frame, conf=0.5)[0]
+        #results = model(frame, conf=0.3)[0]
+        results = model.predict(source=r"firetest11.jpg", conf=0.4)[0]
         annotated_frame = results.plot()
-
+        frame = cv2.imread(r"firetest11.jpg")
         for box, cls, conf in zip(results.boxes.xyxy, results.boxes.cls, results.boxes.conf):
             x1, y1, x2, y2 = box
             cx = int((x1 + x2) / 2)
