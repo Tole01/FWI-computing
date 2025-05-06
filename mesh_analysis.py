@@ -32,7 +32,7 @@ def mesh_segmentation(image, drone_lat, drone_lon, height_m, x_resolution = 240,
             # Convert pixel coordinates into GPS
             lat, lon = pixel_to_gps(x_pixel, y_pixel, img_width, img_height, 
                                     height_m, drone_lat, drone_lon, fov_x_deg, fov_y_deg)
-            print(f'\n{lat}, {lon}')
+            print(f'\nCoordenada de análisis: {lat}, {lon}')
             # Creates object and calculates parameters/risk score
             cell = meshCell(lat, lon, row, col)
             try:
