@@ -41,22 +41,3 @@ temperature_matrix = [[100,80,40,40,80,60,30,30,30,95,90,100,100,25,25,25],
 # Visualización del Análisis de Riesgo
 
 # Comunicación con la nube / Aplicación WEB
-
-# Obtener datos del clima
-row = get_weather_data(lat, lon)
-
-# Calcular FWI
-indices = calculate_fwi(row)
-BUI = indices['BUI']
-
-#Calcular NDVI
-ndvi = get_ndvi(lat,lon)
-
-#Calcular slope
-slope = get_slope(lat, lon)
-
-print(f"\nIncendio en: ({lat_fire:.6f}, {lon_fire:.6f})")
-
-#calcular riesgo de incendio
-risk = calculate_risk_score(ndvi, slope, T_norm, BUI)
-print(f"\n🔥 Risk Score: {risk:.4f}")
