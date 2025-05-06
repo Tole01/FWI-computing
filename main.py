@@ -36,9 +36,6 @@ temperature_matrix = [[100,80,40,40,80,60,30,30,30,95,90,100,100,25,25,25],
                       [30,30,30,30,30,30,30,30,30,30,30,30,30,70,30,30],             
 ] # Matriz de temperaturas de ejemplo
 
-
-
-
 # Análisis de Mallado
 
 # Visualización del Análisis de Riesgo
