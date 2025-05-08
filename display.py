@@ -4,7 +4,7 @@ from scipy.ndimage import convolve
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-def kernel(matriz):
+def NNI_kernel(matriz):
     kernel = np.ones((3, 3)) / 9  # Kernel de promedio 3x3
     return convolve(matriz, kernel, mode='nearest')
 
@@ -29,8 +29,8 @@ def colorear_celdas(imagen, matriz):
         img = imagen.copy()
 
     alto, ancho, _ = img.shape
-    celda_h = alto // 9
-    celda_w = ancho // 16
+    celda_h = alto // 9         # Valor en pixeles de altura
+    celda_w = ancho // 16       # Valor en pixeles de anchura
 
     overlay = img.copy()
 
@@ -55,7 +55,7 @@ def colorear_celdas(imagen, matriz):
 
     return output
 
-
+'''
 if __name__ == "__main__":
 
     # Tu matriz desnormalizada
@@ -103,3 +103,4 @@ if __name__ == "__main__":
     cv2.imshow("Resultado con Kernel", kernel_resultado)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    '''

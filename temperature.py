@@ -4,8 +4,8 @@ def get_temperature(matrix, x, y):
     Obtiene la temperatura de una matriz de temperaturas en una posición específica.
 
     :param matrix: Lista de listas que representa la matriz de temperaturas.
-    :param x: Coordenada x (fila) en la matriz.
-    :param y: Coordenada y (columna) en la matriz.
+    :param x: Coordenada x (columna) en la matriz.
+    :param y: Coordenada y (fila) en la matriz.
     :return: Temperatura en la posición (x, y).
     """
     matrix = normalize_temperature(matrix)

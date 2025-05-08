@@ -3,6 +3,8 @@ import numpy as np
 import math
 from risk_score import calculate_risk_score
 from Api_file import get_weather_data, get_ndvi, get_slope
+from temperature import get_temperature, normalize_temperature
+from main import temp_matrix
 
 class meshCell:
   '''
@@ -16,6 +18,8 @@ class meshCell:
     bui -> Build-up index
     risk -> Computed risk score for the cell
     classf -> Risk classification assigned from score 
+
+
     
   '''
   def __init__(self, lat, lon, row, col):
@@ -41,7 +45,7 @@ class meshCell:
     self.indices['weather'] = get_weather_data(self.lat, self.lon)
     self.indices['ndvi'] = get_ndvi(self.lat, self.lon)
     self.indices['slope'] = get_slope(self.lat, self.lon)
-    self.indices['thermal'] = 0.5 # No hay codigo para este valor todavía
+    self.indices['thermal'] = get_temperature(temp_matrix, self.pos[1], self.pos[0])
     self.indices['bui'] = calculate_fwi(self.indices['weather'])['BUI']
 
     return self.indices
