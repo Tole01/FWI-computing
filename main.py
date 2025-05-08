@@ -1,7 +1,6 @@
 from deteccion_incendio import detect_fire
 from mesh import mesh_segmentation
 from display import NNI_kernel, colorear_celdas
-import random as r
 import cv2
 
 fire = 0 # Variable para indicar si hay fuego o no
@@ -18,7 +17,7 @@ drone_lat,drone_lon,drone_height = 34.191763, -118.133088, 30 #get_coordinates()
 # lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)
 
 # Obtener temperatura de cada coordenada (en pixel) / Sustituir por termografía de FLIR Lepton
-temp_matrix = [ [r.randint(20, 130) for col in range(16)] for row in range(9) ]
+# thermal_matrix = get_thermal_image()
            
 # Análisis de Mallado
 rsk = mesh_segmentation(fire_img, drone_lat, drone_lon, drone_height)
