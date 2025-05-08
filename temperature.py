@@ -18,8 +18,8 @@ def get_temperature(matrix, x, y):
     """
     matrix = normalize_temperature(matrix)
 
-    if 0 <= x < len(matrix) and 0 <= y < len(matrix[0]):
-        return matrix[x][y]
+    if 0 <= y < len(matrix) and 0 <= x < len(matrix[0]):
+        return matrix[y][x]
     else:
         raise IndexError("Coordenadas fuera de los límites de la matriz.")
     
@@ -37,7 +37,7 @@ def normalize_temperature(matrix):
 
     # Normaliza la matriz
     normalized_matrix = [[(temp - min_temp) / (max_temp - min_temp) for temp in row] for row in matrix]
-
+    
     return normalized_matrix
 
 

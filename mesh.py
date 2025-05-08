@@ -31,11 +31,14 @@ def mesh_segmentation(image, drone_lat, drone_lon, height_m, x_columns = 16, y_r
         for col in range(x_columns):
             # Pixel position of the cell
             x_pixel, y_pixel =  col * x_resolution, row * y_resolution
-            print(f'Cell -> Row:[{row}]Col:[{col}]')
-            print(f'Pixel position: {x_pixel}, {y_pixel}')
+            print(f'\nCell -> Row:[{row}]Col:[{col}]')
             # Convert pixel coordinates into GPS
-            lat, lon = pixel_to_gps(x_pixel, y_pixel, img_width, img_height, 
-                                    height_m, drone_lat, drone_lon, fov_x_deg, fov_y_deg)
+            try: 
+                lat, lon = pixel_to_gps(x_pixel, y_pixel, img_width, img_height, 
+                                        height_m, drone_lat, drone_lon, fov_x_deg, fov_y_deg)
+            except:
+                print('Error converting pixel to GPS coordinates.')
+                quit()
             print(f'\nCoordinates: {lat}, {lon}')
             # Creates object and calculates parameters/risk score
             cell = meshCell(lat, lon, row, col)

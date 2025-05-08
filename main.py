@@ -8,7 +8,7 @@ fire = 0 # Variable para indicar si hay fuego o no
 fire_img,cx,cy = detect_fire(fire) # Loop que busca fuego en las dos camaras, guarda la imagen optica con fuego
 
 cv2.imshow("Imagen Óptica Capturada", fire_img)
-cv2.waitKey(0)
+cv2.waitKey(5000)
 cv2.destroyAllWindows()
 
 # Coordenadas que se obtendran de ardupilot
@@ -33,4 +33,5 @@ try:
 except Exception as e:
     print(f'Failed to generate 2D visualization: {e}')
 
+print("Si jala")
 # Comunicación con la nube / Aplicación WEB

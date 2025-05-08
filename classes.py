@@ -3,8 +3,7 @@ import numpy as np
 import math
 from risk_score import calculate_risk_score
 from Api_file import get_weather_data, get_ndvi, get_slope
-from temperature import get_temperature, normalize_temperature
-from temperature import temp_matrix
+from temperature import get_temperature, normalize_temperature, temp_matrix
 
 class meshCell:
   '''
