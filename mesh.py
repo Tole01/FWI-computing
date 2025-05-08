@@ -24,11 +24,15 @@ def mesh_segmentation(image, drone_lat, drone_lon, height_m, x_columns = 16, y_r
     x_resolution, y_resolution = (img_width // x_columns), (img_height // y_rows)
     
     mesh = [[None for _ in range(x_columns)] for _ in range(y_rows)]
-
+    print(f'Image shape: {img_height}x{img_width}')
+    print(f'Cell shape: {y_resolution}x{x_resolution}')
+    print(f'Number of cells: {y_rows}x{x_columns}')
     for row in range(y_rows):
         for col in range(x_columns):
             # Pixel position of the cell
             x_pixel, y_pixel =  col * x_resolution, row * y_resolution
+            print(f'Cell -> Row:[{row}]Col:[{col}]')
+            print(f'Pixel position: {x_pixel}, {y_pixel}')
             # Convert pixel coordinates into GPS
             lat, lon = pixel_to_gps(x_pixel, y_pixel, img_width, img_height, 
                                     height_m, drone_lat, drone_lon, fov_x_deg, fov_y_deg)

@@ -4,6 +4,7 @@ temp_matrix = [ [r.randint(20, 130) for col in range(16)] for row in range(9) ]
 
 
 def get_thermal_image(): # Necesita completarse
+    #conectarme al puerto serial para obtener la matriz del ESP32
     pass
 
 def get_temperature(matrix, x, y):

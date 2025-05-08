@@ -2,6 +2,7 @@ from deteccion_incendio import detect_fire
 from mesh import mesh_segmentation
 from display import NNI_kernel, colorear_celdas
 import cv2
+from coordinates import pixel_to_gps
 
 fire = 0 # Variable para indicar si hay fuego o no
 fire_img,cx,cy = detect_fire(fire) # Loop que busca fuego en las dos camaras, guarda la imagen optica con fuego
@@ -14,10 +15,10 @@ cv2.destroyAllWindows()
 drone_lat,drone_lon,drone_height = 34.191763, -118.133088, 30 #get_coordinates()
 
 # Coordenadas del incendio -> Input para EQUIPO 2
-# lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)
+lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)
 
 # Obtener temperatura de cada coordenada (en pixel) / Sustituir por termografía de FLIR Lepton
-# thermal_matrix = get_thermal_image()
+#thermal_matrix = get_thermal_image()
            
 # Análisis de Mallado
 rsk = mesh_segmentation(fire_img, drone_lat, drone_lon, drone_height)
