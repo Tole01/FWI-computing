@@ -59,6 +59,8 @@ def mesh_segmentation(image, drone_lat, drone_lon, height_m, x_columns = 16, y_r
             # Insterts object into array
             mesh[row][col] = cell.risk
             coord_list.append( (cell.lat, cell.lon, cell.risk) )
+            # Frees up memory
+            del cell
     return mesh, coord_list
 
 
