@@ -25,9 +25,10 @@ def mesh_segmentation(image, drone_lat, drone_lon, height_m, x_columns = 16, y_r
     
     coord_list = []
     mesh = [[None for _ in range(x_columns)] for _ in range(y_rows)]
-    print(f'Image shape: {img_height}x{img_width}')
-    print(f'Cell shape: {y_resolution}x{x_resolution}')
-    print(f'Number of cells: {y_rows}x{x_columns}')
+
+    print(f'Image Dimensions: {img_width}x{img_height}')
+    print(f'Mesh Dimensions: {x_columns}x{y_rows}')
+
     for row in range(y_rows):
         for col in range(x_columns):
             # Pixel position of the cell

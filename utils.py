@@ -186,3 +186,34 @@ def get_slope(lat, lon):
     slope_normalized = slope_deg / 90.0  # Normalizar entre 0 y 1
 
     return slope_normalized
+
+
+# Assigned weight to parameters
+weights = {'NDVI': 0.15, 'SLOPE': 0.20, 'THERMAL': 0.30, 'BUI': 0.35}
+
+def calculate_risk_score(ndvi, slope, thermal, bui):
+    """
+    Calcula el riesgo de incendio utilizando el índice de humedad del combustible (BUI), NDVI y la pendiente del terreno.
+    Donde:
+    - BUI: Índice de humedad del combustible.
+    - NDVI: Índice de vegetación de diferencia normalizada.
+    - slope: Pendiente del terreno.
+    - T_max: Temperatura máxima en °C.
+    - risk_score: Puntuación de riesgo de incendio.
+    Retorna:
+        risk_score: Puntuación de riesgo de incendio.  
+    """
+
+    """
+    >>> calculate_risk_score(0.4, 10, 25, 30)
+    0.0
+    >>> calculate_risk_score(0.6, 20, 35, 40)
+    0.5 
+    >>> calculate_risk_score(0.8, 30, 45, 50)
+    1.0
+    """
+    values = {'NDVI': ndvi, 'SLOPE': slope, 'THERMAL': thermal, 'BUI': bui}
+    
+    risk_score = sum( [weights[param.upper()] * values[param] for param in values.keys()] )
+    
+    return risk_score
