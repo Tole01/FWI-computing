@@ -3,6 +3,8 @@ from mesh import mesh_segmentation
 from display import NNI_kernel, colorear_celdas
 import cv2
 from coordinates import pixel_to_gps
+from geojson_gen import generar_geojson
+from flask import Flask, render_template, send_from_directory
 
 fire = 0 # Variable para indicar si hay fuego o no
 fire_img,cx,cy = detect_fire(fire) # Loop que busca fuego en las dos camaras, guarda la imagen optica con fuego
@@ -34,4 +36,25 @@ except Exception as e:
     print(f'Failed to generate 2D visualization: {e}')
 
 print("Si jala")
-# Comunicación con la nube / Aplicación WEB
+
+
+# Archivo GeoJSON
+generar_geojson()
+
+# Aplicación mostrando mapa 2D y 3D
+app = Flask(__name__, template_folder='templates')
+
+@app.route("/")
+def leaflet():
+    return render_template("leaflet.html")
+
+@app.route("/3d")
+def mapbox3d():
+    return render_template("mapbox3d.html")
+
+@app.route("/riesgo.geojson")
+def geojson():
+    return send_from_directory(".", "riesgo.geojson")
+
+if __name__ == "__main__":
+    app.run(debug=True, use_reloader=False)
