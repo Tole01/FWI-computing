@@ -12,7 +12,7 @@
 <body>
   <div id="map"></div>
   <script>
-    const map = L.map('map').setView([34.05, -118.25], 10);
+    const map = L.map('map');
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18
     }).addTo(map);
@@ -20,13 +20,16 @@
     fetch('/riesgo.geojson')
       .then(res => res.json())
       .then(data => {
-        L.geoJSON(data, {
+        const geojsonLayer = L.geoJSON(data, {
           style: feature => {
             const riesgo = feature.properties.riesgo;
             const color = riesgo > 0.7 ? 'red' : riesgo > 0.4 ? 'yellow' : 'green';
             return { color, fillColor: color, fillOpacity: 0.6 };
           }
         }).addTo(map);
+
+        // Ajustamos el mapa al área del geojson
+        map.fitBounds(geojsonLayer.getBounds());
       });
   </script>
 </body>

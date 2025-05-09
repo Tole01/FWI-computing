@@ -23,6 +23,7 @@ def mesh_segmentation(image, drone_lat, drone_lon, height_m, x_columns = 16, y_r
 
     x_resolution, y_resolution = (img_width // x_columns), (img_height // y_rows)
     
+    coord_list = []
     mesh = [[None for _ in range(x_columns)] for _ in range(y_rows)]
     print(f'Image shape: {img_height}x{img_width}')
     print(f'Cell shape: {y_resolution}x{x_resolution}')
@@ -56,8 +57,8 @@ def mesh_segmentation(image, drone_lat, drone_lon, height_m, x_columns = 16, y_r
        
             # Insterts object into array
             mesh[row][col] = cell.risk
-
-    return mesh
+            coord_list.append( (cell.lat, cell.lon, cell.risk) )
+    return mesh, coord_list
 
 
 

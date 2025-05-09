@@ -23,7 +23,7 @@ lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_l
 #thermal_matrix = get_thermal_image()
            
 # Análisis de Mallado
-rsk = mesh_segmentation(fire_img, drone_lat, drone_lon, drone_height)
+rsk, coord_list = mesh_segmentation(fire_img, drone_lat, drone_lon, drone_height)
 # Nearest neighbor interpolation
 rsk_interpolated = NNI_kernel(rsk)
 # Visualización del Análisis de Riesgo
@@ -39,7 +39,7 @@ print("Si jala")
 
 
 # Archivo GeoJSON
-generar_geojson()
+generar_geojson(coord_list, rsk)
 
 # Aplicación mostrando mapa 2D y 3D
 app = Flask(__name__, template_folder='templates')
