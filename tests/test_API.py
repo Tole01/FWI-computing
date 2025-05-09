@@ -1,5 +1,5 @@
 import unittest
-from Api_file import get_weather_data, get_ndvi, get_slope
+from utils import get_weather_data, get_ndvi, get_slope
 
 
 class Test_APIfunctions(unittest.TestCase):

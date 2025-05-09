@@ -26,7 +26,7 @@ def get_coordinates():
         print(f"❌ Error al obtener coordenadas: {e}")
         return None
 
-def pixel_to_gps(pixel_x, pixel_y, img_width, img_height, height_m, drone_lat, drone_lon, fov_x_deg=70, fov_y_deg=50):
+def pixel_to_gps(pixel_x, pixel_y, img_width, img_height, height_m, drone_lat, drone_lon, fov_x_deg = 157, fov_y_deg = 140):
     """
     Transforma coordenadas de píxeles a coordenadas GPS.
 
@@ -38,8 +38,8 @@ def pixel_to_gps(pixel_x, pixel_y, img_width, img_height, height_m, drone_lat, d
         height_m (float): Altura del dron sobre el suelo en metros.
         drone_lat (float): Latitud actual del dron en grados decimales.
         drone_lon (float): Longitud actual del dron en grados decimales.
-        fov_x_deg (float): Campo de visión horizontal de la cámara en grados. Por defecto 70°.
-        fov_y_deg (float): Campo de visión vertical de la cámara en grados. Por defecto 50°.
+        fov_x_deg (float): Campo de visión horizontal de la cámara en grados. Por defecto 157°.
+        fov_y_deg (float): Campo de visión vertical de la cámara en grados. Por defecto 140°.
 
     Returns:
         (lat, lon): Tuple[float, float] con las coordenadas GPS calculadas en grados decimales.

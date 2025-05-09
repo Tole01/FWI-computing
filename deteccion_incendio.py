@@ -16,18 +16,18 @@ def detect_fire(fire):
         cy (int): Coordenada y del centroide del fuego.
     """
     model = YOLO(r"fire_s.pt")
-    cap = cv2.VideoCapture(0)
+    '''cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("No se pudo abrir la cámara.")
-        exit()
+        exit()'''
 
     img_optica = None  # Inicializamos variable
 
     while fire == 0:
-        ret, frame = cap.read()
+        '''ret, frame = cap.read()
         if not ret:
             print("No se pudo leer el frame de la cámara.")
-            break
+            break'''
 
         # Ejecutar inferencia
         #results = model(frame, conf=0.3)[0]
@@ -44,14 +44,14 @@ def detect_fire(fire):
             if class_name == 'fire':
                 fire = 1
                 img_optica = frame.copy()  # Guardamos la imagen original en el momento de detección
-                print(f"🔥 Incendio detectado - Centroide: ({cx}, {cy}) - Confianza: {conf:.2f}")
+                '''print(f"🔥 Incendio detectado - Centroide: ({cx}, {cy}) - Confianza: {conf:.2f}")
 
                 cv2.circle(annotated_frame, (cx, cy), 5, (0, 0, 255), -1)
                 label = f"{class_name} ({conf:.2f})"
                 cv2.putText(annotated_frame, label, (cx + 10, cy),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
-        cv2.imshow("🔥 Detección de Incendio - Webcam", annotated_frame)
+        #cv2.imshow("🔥 Detección de Incendio - Webcam", annotated_frame)
 
         # Permitir salir manualmente presionando 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -59,6 +59,6 @@ def detect_fire(fire):
             break
 
     cap.release()
-    cv2.destroyAllWindows()
+    cv2.destroyAllWindows()'''
 
     return img_optica,cx,cy
