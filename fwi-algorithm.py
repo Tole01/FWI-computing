@@ -7,15 +7,24 @@ import datetime
 
 def risk_score(ndvi,slope,thermal):
 
-    ndviWeight = 0.3
+    ndviWeight = 0.6
     slopeWeight = 0.4
-    thermalWeight = 0.5
+    thermalWeight = 0.1
 
     #Conversión a °C en caso de ser necesario
     thermal = (thermal*0.2) - 273.15
 
     score = (ndvi*ndviWeight) + (slope*slopeWeight) + (thermal*thermalWeight)
     return score
+
+def visualizar_riesgo(ndvi,slope,lst_image):
+    ndviWeight = 0.3
+    slopeWeight = 0.4
+    thermalWeight = 0.5
+
+    #Cálculo del índice de riesgo como imagen en EE
+    riesgo_img = ndvi.multiply(ndviWeight).add(slope.multiply(slopeWeight)).add(lst_image.multiply(thermalWeight)).rename("Riesgo")
+    return riesgo_img
 
 def spread_rate(deltaH, windSpeed, slopeAng, ignitionHeat):
 
@@ -40,7 +49,7 @@ long = float(input("COORDENADAS DE LONGITUD: "))
 
 #Creación de punto geométrico
 punto = ee.Geometry.Point([long,lat])
-area = punto.buffer(500)
+area = punto.buffer(5000)
 
 #Definición de fecha
 hoy = datetime.date.today()
@@ -81,7 +90,7 @@ slope = ee.Terrain.slope(dem).rename('Pendiente_Angulo').clip(area)
 imagen_completa = ndvi.rename('NDVI').addBands(lst_image).addBands(wind_speed).addBands(slope)
 
 #Muestreo de datos dentro del Buffer
-muestreo = imagen_completa.sample(region=area,scale=10,numPixels=100,geometries=True)
+muestreo = imagen_completa.sample(region=area,scale=100,numPixels=100,geometries=True)
 
 #Lo Convertimos a un diccionario
 datos = muestreo.getInfo()
@@ -100,18 +109,19 @@ for feature in datos['features']:
 
     #Cálculo de índice de riesgo
     riesgo_estimado = risk_score(valor_ndvi,valor_pendiente_rad,valor_temp)
+    riesgo_mapa = visualizar_riesgo(ndvi,slope,lst_image)
     print(f"Coordenadas: {coords}")
     print(f"NDVI: {valor_ndvi}, Temp: {valor_temp} °C, Viento: {valor_wind} m/s, Pendiente: {valor_pendiente}°")
     print(f"Índice de riesgo: {riesgo_estimado:.2f}")
 
 #Se usó Geemap para crear el mapa y luego agregar los puntos 
 #en base a su puntuación calculada de riesgo
-mapa_de_calor = geemap.Map(center=[lat,long], zoom = 14)
+mapa_de_calor = geemap.Map(center=[lat,long], zoom = 15)
 
 #Agregamos el riesgo estimado al mapa recién creado
-riesgo_vis = {'min': 0,'max': 2000,'palette': ['00ff00', 'ffff00', 'ff9900', 'ff0000']}  # Verde -> Rojo
+riesgo_vis = {'min': 0,'max': 5000,'palette': ['00ff00', 'ffff00', 'ff9900', 'ff0000']}  # Verde -> Rojo
 
-mapa_de_calor.addLayer(riesgo_estimado,riesgo_vis, "Índice de Riesgo de Incendio")
+mapa_de_calor.addLayer(riesgo_mapa,riesgo_vis, "Índice de Riesgo de Incendio")
 mapa_de_calor.addLayer(area, {},'Área analizada')
 mapa_de_calor.addLayer(punto,{'color':'blue'},'Punto central del incendio')
 mapa_de_calor.add_colorbar(vis_params=riesgo_vis, label='Índice de Riesgo')
