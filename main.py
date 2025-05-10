@@ -7,8 +7,8 @@ from geojson_gen import generar_geojson
 from flask import Flask, render_template, send_from_directory
 
 fire = 0 # Variable para indicar si hay fuego o no
-fire_img,cx,cy = detect_fire(fire) # Loop que busca fuego en las dos camaras, guarda la imagen optica con fuego
-
+fire_img,cx,cy,fire_coordinates = detect_fire(fire) # Loop que busca fuego en las dos camaras, guarda la imagen optica con fuego
+print(fire_coordinates)
 cv2.imshow("Imagen Óptica Capturada", fire_img)
 cv2.waitKey(5000)
 cv2.destroyAllWindows()
@@ -24,7 +24,7 @@ lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_l
            
 # Análisis de Mallado
 rsk, coord_list = mesh_segmentation(fire_img, drone_lat, drone_lon, drone_height)
-rsk_image = colorear_celdas(fire_img, rsk)
+rsk_image = colorear_celdas(fire_img, rsk,fire_coordinates)
 cv2.imshow("Fire risk output", rsk_image)
 cv2.waitKey(0)
 cv2.destroyAllWindows
@@ -33,7 +33,7 @@ rsk_interpolated = NNI_kernel(rsk)
 # Visualización del Análisis de Riesgo
 try: 
     rsk_image = colorear_celdas(fire_img, rsk_interpolated)
-    cv2.imshow("Fire risk output", rsk_image)
+    cv2.imshow("Fire risk output kernel", rsk_image)
     cv2.waitKey(0)
     cv2.destroyAllWindows
 except Exception as e:

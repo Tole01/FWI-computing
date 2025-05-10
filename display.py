@@ -8,7 +8,7 @@ def NNI_kernel(matriz):
     kernel = np.ones((3, 3)) / 9  # Kernel de promedio 3x3
     return convolve(matriz, kernel, mode='nearest')
 
-def colorear_celdas(imagen, matriz):
+def colorear_celdas(imagen, matriz, fire_coordinates):
     """
     Divide la imagen en 16x9 celdas y colorea cada celda de acuerdo con el valor en la matriz.
     Verde: 0 - 0.3
@@ -48,6 +48,12 @@ def colorear_celdas(imagen, matriz):
             x1, y1 = col * celda_w, fila * celda_h
             x2, y2 = x1 + celda_w, y1 + celda_h
             cv2.rectangle(overlay, (x1, y1), (x2, y2), color, -1)
+    
+    for x, y in fire_coordinates:
+        color = (161, 0, 102)  # Verde (BGR)
+        center = (x,y)
+        radio = 20
+        cv2.circle(overlay, center, radio, color, -1)
 
     # Superponer con transparencia (alpha blending)
     alpha = 0.3  # Transparencia

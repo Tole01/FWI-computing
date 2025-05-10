@@ -34,10 +34,12 @@ def detect_fire(fire):
         results = model.predict(source=r"firetest11.jpg", conf=0.4)[0]
         annotated_frame = results.plot()
         frame = cv2.imread(r"firetest11.jpg")
+        fire_coordinates = []  # Lista para almacenar los pares (cx, cy)
         for box, cls, conf in zip(results.boxes.xyxy, results.boxes.cls, results.boxes.conf):
             x1, y1, x2, y2 = box
             cx = int((x1 + x2) / 2)
             cy = int((y1 + y2) / 2)
+            fire_coordinates.append((cx, cy))  # Agregar el par (cx, cy) a la lista
 
             class_name = results.names[int(cls)]
 
@@ -61,4 +63,4 @@ def detect_fire(fire):
     cap.release()
     cv2.destroyAllWindows()'''
 
-    return img_optica,cx,cy
+    return img_optica,cx,cy,fire_coordinates
