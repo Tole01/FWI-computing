@@ -24,6 +24,10 @@ lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_l
            
 # Análisis de Mallado
 rsk, coord_list = mesh_segmentation(fire_img, drone_lat, drone_lon, drone_height)
+rsk_image = colorear_celdas(fire_img, rsk)
+cv2.imshow("Fire risk output", rsk_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows
 # Nearest neighbor interpolation
 rsk_interpolated = NNI_kernel(rsk)
 # Visualización del Análisis de Riesgo
@@ -34,9 +38,6 @@ try:
     cv2.destroyAllWindows
 except Exception as e:
     print(f'Failed to generate 2D visualization: {e}')
-
-print("Si jala")
-
 
 # Archivo GeoJSON
 generar_geojson(coord_list, rsk)

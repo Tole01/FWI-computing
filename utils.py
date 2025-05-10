@@ -161,7 +161,7 @@ def get_slope(lat, lon):
         float: Pendiente en grados.
     """
     MAPBOX_TOKEN = 'pk.eyJ1IjoiamFjb2JvMjciLCJhIjoiY204eW5maTdjMDMwODJqb293ZGd4cTNscSJ9.0_kcUB4XbYyrw3PPGT-QuQ'
-    ZOOM = 15  # Quieres mayor o menor resolución
+    ZOOM = 17  # Quieres mayor o menor resolución
     x_tile, y_tile = latlon_to_tilexy(lat, lon, ZOOM)
     image = get_tile_image(x_tile, y_tile, ZOOM, MAPBOX_TOKEN)
     pixels = np.array(image)
@@ -189,7 +189,7 @@ def get_slope(lat, lon):
 
 
 # Assigned weight to parameters
-weights = {'NDVI': 0.15, 'SLOPE': 0.20, 'THERMAL': 0.30, 'BUI': 0.35}
+weights = {'NDVI': 0.23, 'SLOPE': 0.03, 'THERMAL': 0.48, 'BUI': 0.26}
 
 def calculate_risk_score(ndvi, slope, thermal, bui):
     """
