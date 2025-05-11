@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import math
 from utils import get_weather_data, get_ndvi, get_slope, calculate_risk_score
-from temperature import get_temperature, normalize_temperature, temp_matrix
+from temperature import get_temperature, temp_matrix
 
 class meshCell:
   '''

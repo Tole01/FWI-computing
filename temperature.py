@@ -1,5 +1,5 @@
 import serial
-
+"""
 temp_matrix = [
     [135, 100,  40,  60,  80, 135,  30,  30,  60, 125, 130, 130, 130,  90,  60,  25],
     [130, 115, 140,  65, 135,  75, 110,  30,  25,  65,  25,  25,  25, 130, 130,  70],
@@ -11,7 +11,7 @@ temp_matrix = [
     [ 25,  25,  25, 115, 130,  25,  25,  25, 100, 120, 120,  90, 135,  90, 135,  30],
     [ 30,  30,  30,  30,  30,  30,  30,  35,  40,  35,  60,  35,  90, 130,  95,  30]
 ]
-
+"""
 def get_thermal_image(): # Necesita completarse
     #conectarme al puerto serial para obtener la matriz del ESP32
     pass
@@ -49,16 +49,13 @@ def normalize_temperature(matrix):
     
     return normalized_matrix
 
-def get_max_temp():
+def get_temp_matrix():
     """
     Lee el puerto serial del esp32 y recibe la matriz 16x9 de temperatura de la camara termica
 
-    Args:
-        None
+    param: None
 
-    Returns:
-        temp_matrix (matriz):
-            16x9 de temperatura 
+    :return: temp_matrix (matriz) 16x9 de temperatura 
     """
     ser = serial.Serial('COM7', 115200, timeout=1)
 
@@ -81,3 +78,5 @@ def get_max_temp():
                 continue  # Ignora líneas corruptas
 
     return temp_matrix
+
+temp_matrix = get_temp_matrix()
