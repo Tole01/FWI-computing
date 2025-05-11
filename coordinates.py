@@ -5,26 +5,26 @@ def get_coordinates():
     """
     Se conecta al dron vía MAVLink y retorna la latitud y longitud actuales.
     Retorna:
-        (lat, lon): Tuple[float, float] con coordenadas GPS en grados decimales
+        (lat, lon, alt): coordenadas GPS en grados decimales
     """
-    try:
-        # Conexión al puerto UDP donde MAVProxy reenvía los datos
-        master = mavutil.mavlink_connection('udp:127.0.0.1:14550')
-        master.wait_heartbeat(timeout=10)
-        print("✅ Conectado al dron. Esperando datos GPS...")
+    master = mavutil.mavlink_connection('COM14',baud = 115200) #Cambiar el puerto en caso de ser necesario
 
-        # Espera a recibir datos GPS válidos
-        msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True, timeout=10)
-        if msg:
-            lat = msg.lat / 1e7
-            lon = msg.lon / 1e7
-            return lat, lon
-        else:
-            print("❌ No se recibió mensaje GPS a tiempo.")
-            return None
-    except Exception as e:
-        print(f"❌ Error al obtener coordenadas: {e}")
-        return None
+    print("Esperando mensajes del dron...")
+    try:
+        while True:
+            # Recibir cualquier mensaje
+            msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
+            if msg:
+                # Extraer latitud, longitud y altura
+                lat = msg.lat / 1e7        # Convertir de 10^7 grados a grados decimales
+                lon = msg.lon / 1e7
+                alt = msg.alt / 1000.0     # Convertir de milímetros a metros
+
+                # Imprimir las coordenadas
+                print(f"📍 Latitud: {lat:.6f}, Longitud: {lon:.6f}, Altura: {alt:.2f} m")
+
+    except KeyboardInterrupt:
+        print("Conexión terminada.")
 
 def pixel_to_gps(pixel_x, pixel_y, img_width, img_height, height_m, drone_lat, drone_lon, fov_x_deg = 157, fov_y_deg = 140):
     """
