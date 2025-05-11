@@ -6,6 +6,7 @@ from coordinates import pixel_to_gps
 from geojson_gen import generar_geojson
 from flask import Flask, render_template, send_from_directory
 from coordinates import get_coordinates
+from temperature import get_max_temp
 
 fire = 0 # Variable para indicar si hay fuego o no
 fire_img,cx,cy,fire_coordinates = detect_fire(fire) # Loop que busca fuego en las dos camaras, guarda la imagen optica con fuego
@@ -21,8 +22,8 @@ drone_lat,drone_lon,drone_height = 34.191763, -118.133088, 30 #para el ejemplo
 # Coordenadas del incendio -> Input para EQUIPO 2
 lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)
 
-# Obtener temperatura de cada coordenada (en pixel) / Sustituir por termografía de FLIR Lepton
-#thermal_matrix = get_thermal_image()
+# Obtener temperatura de cada coordenada (en pixel)
+thermal_matrix = get_max_temp()
            
 # Análisis de Mallado
 rsk, coord_list = mesh_segmentation(fire_img, drone_lat, drone_lon, drone_height)

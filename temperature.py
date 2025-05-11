@@ -1,3 +1,5 @@
+import serial
+
 temp_matrix = [
     [135, 100,  40,  60,  80, 135,  30,  30,  60, 125, 130, 130, 130,  90,  60,  25],
     [130, 115, 140,  65, 135,  75, 110,  30,  25,  65,  25,  25,  25, 130, 130,  70],
@@ -47,18 +49,35 @@ def normalize_temperature(matrix):
     
     return normalized_matrix
 
+def get_max_temp():
+    """
+    Lee el puerto serial del esp32 y recibe la matriz 16x9 de temperatura de la camara termica
 
+    Args:
+        None
 
-"""
-T = get_img(void)
-Retorna una matriz de temperaturas de 160x120
-Se conceta a la camara termica y obtiene la imagen
+    Returns:
+        temp_matrix (matriz):
+            16x9 de temperatura 
+    """
+    ser = serial.Serial('COM7', 115200, timeout=1)
 
-T_max = get_max_temp(T)
-Retorna una matriz de temperaturas de 16 x 9
-Junta pixeles de la camara termica, calcula el maximo de cada bloque y lo guarda en la matriz
+    temp_matrix = []
+    leyendo = False
+    while True:
+        line = ser.readline().decode(errors="ignore").strip()
+        if line == "<START>":
+            leyendo = True
+            temp_matrix = []
+            continue
+        elif line == "<END>":
+            break
+        elif leyendo:
+            try:
+                fila = [int(x) for x in line.split(",")]
+                if len(fila) == 9:
+                    temp_matrix.append(fila)
+            except ValueError:
+                continue  # Ignora líneas corruptas
 
-Temp = get_temperature(row, column)
-Retorna la temperatura de la matriz de temperaturas maximas en la posicion row,column
-Se llama desde el mesh analysis para guardar la temperatura de cada celda
-"""
+    return temp_matrix
