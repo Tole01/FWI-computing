@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 from scipy.ndimage import convolve
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 def NNI_kernel(matriz):
     kernel = np.ones((3, 3)) / 9  # Kernel de promedio 3x3

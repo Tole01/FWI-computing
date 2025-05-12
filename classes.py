@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import math
 from utils import get_weather_data, get_ndvi, get_slope, calculate_risk_score
-from temperature import get_temperature, temp_matrix
+from temperature import get_temperature
 
 class meshCell:
   '''
@@ -18,13 +18,14 @@ class meshCell:
     classf -> Risk classification assigned from score 
 
   '''
-  def __init__(self, lat, lon, row, col):
+  def __init__(self, lat, lon, row, col,thermal_matrix):
     self.pos = (row, col)
     self.lat = lat
     self.lon = lon
     self.indices = {}
     self.risk = None
     self.clasif = None
+    self.thermal_matrix = thermal_matrix  # Store the thermal matrix
   
   def __str__(self):
     '''
@@ -41,7 +42,7 @@ class meshCell:
     self.indices['weather'] = get_weather_data(self.lat, self.lon)
     self.indices['ndvi'] = get_ndvi(self.lat, self.lon)
     self.indices['slope'] = get_slope(self.lat, self.lon)
-    self.indices['thermal'] = get_temperature(temp_matrix, self.pos[1], self.pos[0])
+    self.indices['thermal'] = get_temperature(self.thermal_matrix, self.pos[1], self.pos[0])
     self.indices['bui'] = calculate_fwi(self.indices['weather'])['BUI']
 
     return self.indices

@@ -7,26 +7,37 @@ from geojson_gen import generar_geojson
 from flask import Flask, render_template, send_from_directory
 from coordinates import get_coordinates
 from temperature import get_temp_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 fire = 0 # Variable para indicar si hay fuego o no
 fire_img,cx,cy,fire_coordinates = detect_fire(fire) # Loop que busca fuego en las dos camaras, guarda la imagen optica con fuego
 print(fire_coordinates)
+
+thermal_matrix = get_temp_matrix() # Obtener temperatura de cada coordenada (en pixel)
+print(thermal_matrix)
+
 cv2.imshow("Imagen Óptica Capturada", fire_img)
 cv2.waitKey(5000)
 cv2.destroyAllWindows()
 
+plt.figure(figsize=(14, 6))
+sns.heatmap(thermal_matrix, annot=True, fmt="d", cmap="YlOrRd", cbar=True)
+plt.title("Mapa de Calor - Matriz de Riesgo")
+plt.xlabel("Columna")
+plt.ylabel("Fila")
+plt.tight_layout()
+plt.show()
+
 # Coordenadas que se obtendran de ardupilot
 drone_lat,drone_lon,drone_height = get_coordinates() #el de verdad
-drone_lat,drone_lon,drone_height = 34.191763, -118.133088, 30 #para el ejemplo
+#drone_lat,drone_lon,drone_height = 34.191763, -118.133088, 30 #para el ejemplo
 
 # Coordenadas del incendio -> Input para EQUIPO 2
 lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)
 
-# Obtener temperatura de cada coordenada (en pixel)
-thermal_matrix = get_temp_matrix()
-print(thermal_matrix)
 # Análisis de Mallado
-rsk, coord_list = mesh_segmentation(fire_img, drone_lat, drone_lon, drone_height)
+rsk, coord_list = mesh_segmentation(fire_img, thermal_matrix, drone_lat, drone_lon, drone_height)
 rsk_image = colorear_celdas(fire_img, rsk,fire_coordinates)
 cv2.imshow("Fire risk output", rsk_image)
 cv2.waitKey(0)

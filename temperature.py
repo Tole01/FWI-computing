@@ -78,5 +78,3 @@ def get_temp_matrix():
                 continue  # Ignora líneas corruptas
 
     return temp_matrix
-
-temp_matrix = get_temp_matrix()
