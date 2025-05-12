@@ -31,9 +31,9 @@ def detect_fire(fire):
 
         # Ejecutar inferencia
         results = model(frame, conf=0.3)[0] #resultados de YOLO en el frame
-        results = model.predict(source=r"firetest11.jpg", conf=0.4)[0] #ejemplo se borra
+        #results = model.predict(source=r"firetest11.jpg", conf=0.4)[0] #ejemplo se borra
         annotated_frame = results.plot()
-        frame = cv2.imread(r"firetest11.jpg") #ejemplo se borra
+        #frame = cv2.imread(r"firetest11.jpg") #ejemplo se borra
         fire_coordinates = []  # Lista para almacenar los pares (cx, cy)
         for box, cls, conf in zip(results.boxes.xyxy, results.boxes.cls, results.boxes.conf):
             x1, y1, x2, y2 = box
