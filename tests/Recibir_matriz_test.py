@@ -14,17 +14,20 @@ def recibir_matriz(ser):
         elif leyendo:
             try:
                 fila = [int(x) for x in line.split(",")]
-                if len(fila) == 9:
+                if len(fila) == 16:
                     matriz.append(fila)
             except ValueError:
                 continue  # Ignora líneas corruptas
     return matriz
 
-# Ajusta el puerto
+# Ajusta el puerto según tu sistema
 ser = serial.Serial('COM7', 115200, timeout=1)
 
 while True:
     matriz = recibir_matriz(ser)
-    print("Matriz recibida:")
-    for fila in matriz:
-        print(fila)
+    if len(matriz) == 9:
+        print("✅ Matriz recibida (9x16):")
+        for fila in matriz:
+            print(fila)
+    else:
+        print("❌ Matriz incompleta o malformada.")

@@ -72,7 +72,7 @@ def get_temp_matrix():
         elif leyendo:
             try:
                 fila = [int(x) for x in line.split(",")]
-                if len(fila) == 9:
+                if len(fila) == 16:
                     temp_matrix.append(fila)
             except ValueError:
                 continue  # Ignora líneas corruptas
