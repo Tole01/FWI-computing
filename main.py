@@ -6,7 +6,7 @@ from coordinates import pixel_to_gps
 from geojson_gen import generar_geojson
 from flask import Flask, render_template, send_from_directory
 from coordinates import get_coordinates
-from temperature import get_temp_matrix
+from temperature import get_temp_matrix, normalize_temperature
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -15,23 +15,16 @@ fire_img,cx,cy,fire_coordinates = detect_fire(fire) # Loop que busca fuego en la
 print(fire_coordinates)
 
 thermal_matrix = get_temp_matrix() # Obtener temperatura de cada coordenada (en pixel)
-print(thermal_matrix)
+normalized_matrix = normalize_temperature(thermal_matrix) # Normalizar la matriz de temperatura
+print(normalized_matrix)
 
 cv2.imshow("Imagen Óptica Capturada", fire_img)
 cv2.waitKey(5000)
 cv2.destroyAllWindows()
 
-plt.figure(figsize=(14, 6))
-sns.heatmap(thermal_matrix, annot=True, fmt="d", cmap="YlOrRd", cbar=True)
-plt.title("Mapa de Calor - Matriz de Riesgo")
-plt.xlabel("Columna")
-plt.ylabel("Fila")
-plt.tight_layout()
-plt.show()
-
 # Coordenadas que se obtendran de ardupilot
-drone_lat,drone_lon,drone_height = get_coordinates() #el de verdad
-#drone_lat,drone_lon,drone_height = 34.191763, -118.133088, 30 #para el ejemplo
+#drone_lat,drone_lon,drone_height = get_coordinates() #el de verdad
+drone_lat,drone_lon,drone_height = 34.191763, -118.133088, 30 #para el ejemplo
 
 # Coordenadas del incendio -> Input para EQUIPO 2
 lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)
@@ -53,6 +46,14 @@ try:
 except Exception as e:
     print(f'Failed to generate 2D visualization: {e}')
 
+
+plt.figure(figsize=(14, 6))
+sns.heatmap(thermal_matrix, annot=True, fmt="d", cmap="YlOrRd", cbar=True)
+plt.title("Mapa de Calor - Matriz de Riesgo")
+plt.xlabel("Columna")
+plt.ylabel("Fila")
+plt.tight_layout()
+plt.show()
 # Archivo GeoJSON
 generar_geojson(coord_list, rsk)
 
