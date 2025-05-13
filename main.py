@@ -23,8 +23,8 @@ cv2.waitKey(5000)
 cv2.destroyAllWindows()
 
 # Coordenadas que se obtendran de ardupilot
-drone_lat,drone_lon,drone_height = get_coordinates() #el de verdad
-#drone_lat,drone_lon,drone_height = 34.191763, -118.133088, 30 #para el ejemplo
+#drone_lat,drone_lon,drone_height = get_coordinates() #el de verdad
+drone_lat,drone_lon,drone_height = 34.191763, -118.133088, 30 #para el ejemplo
 
 # Coordenadas del incendio -> Input para EQUIPO 2
 lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)
@@ -54,6 +54,8 @@ plt.xlabel("Columna")
 plt.ylabel("Fila")
 plt.tight_layout()
 plt.show()
+
+
 # Archivo GeoJSON
 generar_geojson(coord_list, rsk)
 

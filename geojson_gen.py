@@ -1,4 +1,5 @@
 import geojson
+import numpy as np
 
 def calcular_step(matriz):
     if len(matriz) < 2:
@@ -48,12 +49,13 @@ def generar_geojson(coord_list, rsk):
     (34.010, -118.300, 0.35), (34.010, -118.295, 0.40), (34.010, -118.290, 0.55), (34.010, -118.285, 0.70), (34.010, -118.280, 0.95),
     (34.015, -118.300, 0.50), (34.015, -118.295, 0.60), (34.015, -118.290, 0.75), (34.015, -118.285, 0.80), (34.015, -118.280, 0.98),
     (34.020, -118.300, 0.65), (34.020, -118.295, 0.70), (34.020, -118.290, 0.85), (34.020, -118.285, 0.90), (34.020, -118.280, 1.00)
-]
+    ]
     
     step = 0.01  # tamaño del cuadrado en grados/coordenadas geográficas (1 grado = 111 km aprox)
     step = 0.000196
     step = calcular_step(matriz)
-    step = 0.005
+    print(f"Step calculado: {step}")
+    #step = 0.005
 
     
     features = []
