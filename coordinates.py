@@ -7,7 +7,7 @@ def get_coordinates():
     Retorna:
         (lat, lon, alt): coordenadas GPS en grados decimales
     """
-    master = mavutil.mavlink_connection('COM14',baud = 115200) #Cambiar el puerto en caso de ser necesario
+    master = mavutil.mavlink_connection('COM4',baud = 115200) #Cambiar el puerto en caso de ser necesario
 
     print("Esperando mensajes del dron...")
     try:
@@ -22,6 +22,7 @@ def get_coordinates():
 
                 # Imprimir las coordenadas
                 print(f"📍 Latitud: {lat:.6f}, Longitud: {lon:.6f}, Altura: {alt:.2f} m")
+                return lat, lon, alt
 
     except KeyboardInterrupt:
         print("Conexión terminada.")

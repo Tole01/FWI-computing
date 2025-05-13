@@ -57,7 +57,7 @@ def get_temp_matrix():
 
     :return: temp_matrix (matriz) 16x9 de temperatura 
     """
-    ser = serial.Serial('COM7', 115200, timeout=2)
+    ser = serial.Serial('COM3', 115200, timeout=2)
 
     temp_matrix = []
     leyendo = False
