@@ -57,7 +57,7 @@ def get_temp_matrix():
 
     :return: temp_matrix (matriz) 16x9 de temperatura 
     """
-    ser = serial.Serial('COM7', 115200, timeout=1)
+    ser = serial.Serial('COM7', 115200, timeout=2)
 
     temp_matrix = []
     leyendo = False
@@ -78,3 +78,19 @@ def get_temp_matrix():
                 continue  # Ignora líneas corruptas
 
     return temp_matrix
+
+def normalize_temperature(matrix):
+    """
+    Normaliza la temperatura de una matriz de temperaturas de -10 a 140
+
+    :param matrix: Lista de listas que representa la matriz de temperaturas.
+    :return: Matriz de temperaturas normalizada.
+    """
+    # Encuentra el valor mínimo y máximo en la matriz
+    min_temp = -10  # Valor mínimo de temperatura de la camara
+    max_temp = 140   # Valor máximo de temperatura de la camara
+
+    # Normaliza la matriz
+    normalized_matrix = [[(temp - min_temp) / (max_temp - min_temp) for temp in row] for row in matrix]
+    
+    return normalized_matrix
