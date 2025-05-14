@@ -57,9 +57,8 @@ def detect_fire(model, fire = 0):
                     cv2.putText(annotated_frame, label, (cx + 10, cy),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                     
-            # Display image every 10 frames or if fire is detected
-            if fire == 1 or frame_count % 10 == 0:
-                cv2.imshow("Detección de Incendio - Webcam", annotated_frame)
+         
+            cv2.imshow("Detección de Incendio - Webcam", annotated_frame)
 
             # Permitir salir manualmente presionando 'q'
             if cv2.waitKey(1) & 0xFF == ord('q'):
