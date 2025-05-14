@@ -1,7 +1,20 @@
-from deteccion_incendio import detect_fire
+"""Fire Detection and Prediction Model
+Instituto Tecnológico y de Estudios Superiores de Monterrey, Campus Monterrey
+MR3002B.501: Diseño e implementación de Sistemas Mecatrónicos
+Socio Formador: Green Tech Innovation
+
+Equipo 2 (Integrantes):
+
+Christopher Santiago Ducey a01174113@tec.mx
+Joel
+Jacobo
+Hector Andrés
+"""
+from fire_detection import detect_fire
 from mesh import mesh_segmentation
 from display import NNI_kernel, colorear_celdas
 import cv2
+from ultralytics import YOLO
 from coordinates import pixel_to_gps
 from geojson_gen import generar_geojson
 from flask import Flask, render_template, send_from_directory
@@ -10,8 +23,9 @@ from temperature import get_temp_matrix, normalize_temperature
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-fire = 0 # Variable para indicar si hay fuego o no
-fire_img,cx,cy,fire_coordinates = detect_fire(fire) # Loop que busca fuego en las dos camaras, guarda la imagen optica con fuego
+# Inicialización del proceso de detección incendio a través de cámara óptica y térmica YOLOv8
+model = YOLO(r"fire_s.pt")
+fire_img, cx, cy, fire_coordinates = detect_fire(model) 
 print(fire_coordinates)
 
 thermal_matrix = get_temp_matrix() # Obtener temperatura de cada coordenada (en pixel)
