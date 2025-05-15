@@ -59,7 +59,7 @@ plt.show()
 
 
 # Archivo GeoJSON
-generar_geojson(coord_list, rsk)
+generar_geojson(coord_list)
 
 # Aplicación mostrando mapa 2D y 3D
 app = Flask(__name__, template_folder='templates')

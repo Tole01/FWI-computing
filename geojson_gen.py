@@ -1,5 +1,4 @@
 import geojson
-import numpy as np
 
 def calcular_step(matriz):
     if len(matriz) < 2:
@@ -27,22 +26,15 @@ def calcular_step(matriz):
     return min(filter(None, [dif_lat, dif_lon])) or 0.005
 
 
-def generar_geojson(coord_list, rsk):
+def generar_geojson(coord_list):
     
-    # Matriz ejemplo (latitud, longitud, nivel de riesgo [0–1])
+    # Matrices ejemplo (latitud, longitud, nivel de riesgo [0–1])
     matriz = [
         (34.05, -118.25, 0.2),
         (34.06, -118.25, 0.6),
         (34.07, -118.25, 0.9)
     ]
 
-    #for coord_pair in coord_list:
-    #    for i in range(len(rsk)):
-    #        for j in range(len(rsk[i])):
-    #            coord_pair = (coord_pair[0] ,coord_pair[1], rsk[i][j])
-
-    matriz = coord_list
-    print(matriz)
     matriz = [
     (34.000, -118.300, 0.10), (34.000, -118.295, 0.15), (34.000, -118.290, 0.30), (34.000, -118.285, 0.60), (34.000, -118.280, 0.85),
     (34.005, -118.300, 0.20), (34.005, -118.295, 0.25), (34.005, -118.290, 0.45), (34.005, -118.285, 0.65), (34.005, -118.280, 0.90),
@@ -50,12 +42,14 @@ def generar_geojson(coord_list, rsk):
     (34.015, -118.300, 0.50), (34.015, -118.295, 0.60), (34.015, -118.290, 0.75), (34.015, -118.285, 0.80), (34.015, -118.280, 0.98),
     (34.020, -118.300, 0.65), (34.020, -118.295, 0.70), (34.020, -118.290, 0.85), (34.020, -118.285, 0.90), (34.020, -118.280, 1.00)
     ]
-    
-    step = 0.01  # tamaño del cuadrado en grados/coordenadas geográficas (1 grado = 111 km aprox)
-    step = 0.000196
+
+    # Matriz con coordenadas y riesgo reales
+    matriz = coord_list
+    print(matriz)
+
+    step = 0.000196                 # tamaño del cuadrado en grados/coordenadas geográficas (1 grado = 111 km aprox)
     step = calcular_step(matriz)
     print(f"Step calculado: {step}")
-    #step = 0.005
 
     
     features = []

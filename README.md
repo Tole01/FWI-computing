@@ -185,8 +185,10 @@ Se levanta una aplicación con Flask que permite visualizar:
 
 ## Licencias
 
-[Mapbox](token)   -->      Es necesario crear una cuenta y utilizar un token que se coloca en `mapbox3d.html`.
-[APIs]
+[Mapbox](token)            -->      Es necesario crear una cuenta y utilizar el token generado en `mapbox3d.html` y `utils.py`.
+[OpenWeather](key)         -->      xx
+[SentinelHub](user...)     -->      xx
+[etc]...
 
 ## Autor
 
