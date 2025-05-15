@@ -1,5 +1,5 @@
 
-# Nombre del Proyecto
+## Nombre del Proyecto
 
 Fire Detection and Prediction Model
 Instituto Tecnológico y de Estudios Superiores de Monterrey, Campus Monterrey
@@ -12,6 +12,7 @@ Socio Formador: Green Tech Innovation (GTI)
 - [Uso](#uso)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Requisitos](#requisitos)
+- [Configuración del Sistena](#configuración-del-sistema)
 - [Funcionamiento](#funcionamiento)
 - [Licencias](#licencias)
 - [Autor](#autor)
@@ -147,6 +148,21 @@ Instálalas con:
 ```bash
 pip install -r requirements.txt
 ```
+
+## Configuración del Sistema
+
+Antes de ejecutar el sistema, asegúrate de configurar los siguientes parámetros según las características de tu dron y cámara:
+
+- FOV_optica_horizontal –> Campo de visión horizontal de la cámara óptica (en grados)
+- FOV_optica_vertical -> Campo de visión vertical de la cámara óptica (en grados)
+- FOV_termica_horizontal -> Campo de visión horizontal de la cámara térmica (en grados)
+- FOV_termica_vertical -> Campo de visión vertical de la cámara térmica (en grados)
+- thermal_width – Resolución horizontal de la matriz térmica (en pixeles)
+- thermal_height – Resolución vertical de la matriz térmica (en pixeles)
+- COM_antena - puerto donde se conecta la antena del dron
+- COM_esp - puerto donde se conecta el ESP32
+
+Estos parámetros se deben definir en el archivo `config.py`.
 
 ## Funcionamiento
 

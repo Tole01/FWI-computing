@@ -10,6 +10,7 @@ from coordinates import get_coordinates
 from temperature import get_temp_matrix, normalize_temperature
 import seaborn as sns
 import matplotlib.pyplot as plt
+from config import FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL, FOV_TERMICA_HORIZONTAL, FOV_TERMICA_VERTICAL
 
 # Inicialización del proceso de detección incendio a través de cámara óptica y térmica YOLOv8
 model = YOLO(r"fire_s.pt")
@@ -26,10 +27,10 @@ cv2.destroyAllWindows()
 
 # Coordenadas que se obtendran de ardupilot
 drone_lat,drone_lon,drone_height = get_coordinates() #el de verdad
-#drone_lat,drone_lon,drone_height = 34.191763, -118.133088, 30 #para el ejemplo
+#drone_lat,drone_lon,drone_height = 25.64933, -100.28890, 30 #para el ejemplo
 
 # Coordenadas del incendio -> Input para EQUIPO 2
-lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon,157.1,140.4)
+lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon, FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL)
 
 # Análisis de Mallado
 rsk, coord_list = mesh_segmentation(fire_img, thermal_matrix, drone_lat, drone_lon, drone_height)

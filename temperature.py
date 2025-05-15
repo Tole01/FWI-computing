@@ -1,4 +1,6 @@
 import serial
+from config import COM_ESP
+
 """
 temp_matrix = [
     [135, 100,  40,  60,  80, 135,  30,  30,  60, 125, 130, 130, 130,  90,  60,  25],
@@ -57,7 +59,7 @@ def get_temp_matrix():
 
     :return: temp_matrix (matriz) 16x9 de temperatura 
     """
-    ser = serial.Serial('COM3', 115200, timeout=2)
+    ser = serial.Serial(COM_ESP, 115200, timeout=2)
 
     temp_matrix = []
     leyendo = False

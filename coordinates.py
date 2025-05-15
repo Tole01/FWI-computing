@@ -1,4 +1,5 @@
 from pymavlink import mavutil
+from config import COM_ANTENA
 import math
 
 def get_coordinates():
@@ -7,7 +8,7 @@ def get_coordinates():
     Retorna:
         (lat, lon, alt): coordenadas GPS en grados decimales
     """
-    master = mavutil.mavlink_connection('COM4',baud = 115200) #Cambiar el puerto en caso de ser necesario
+    master = mavutil.mavlink_connection(COM_ANTENA,baud = 115200) #Cambiar el puerto en caso de ser necesario
 
     print("Esperando mensajes del dron...")
     try:
