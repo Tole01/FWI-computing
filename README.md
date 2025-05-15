@@ -49,8 +49,7 @@ Socio Formador: Green Tech Innovation (GTI)
 
 ```
 FWI-COMPUTING/
-├── tests/
-│   └── mapa.js            # Script con Leaflet o Mapbox
+├── tests/                 # Tests
 ├── templates/
 │   └── leaflet.html       # Mapa en 2D
 │   └── mapbox3d.html      # Mapa en 3D
