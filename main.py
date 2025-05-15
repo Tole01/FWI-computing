@@ -1,15 +1,3 @@
-"""Fire Detection and Prediction Model
-Instituto Tecnológico y de Estudios Superiores de Monterrey, Campus Monterrey
-MR3002B.501: Diseño e implementación de Sistemas Mecatrónicos
-Socio Formador: Green Tech Innovation
-
-Equipo 2 (Integrantes):
-
-Christopher Santiago Ducey a01174113@tec.mx
-Joel
-Jacobo
-Hector Andrés
-"""
 from fire_detection import detect_fire
 from mesh import mesh_segmentation
 from display import NNI_kernel, colorear_celdas
