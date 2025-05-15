@@ -60,14 +60,14 @@ FWI-COMPUTING/
 ├── fire_s.pt              # Modelo YOLOv8 entrenado
 ├── firetest11.jpg         # Imagen utilizada en tests
 ├── main.py                # Archivo de donde se llaman todas las funciones; servidor Flask
-├── classes.py             # xx
-├── coordinates.py         # xx
-├── display.py             # xx
-├── fire_detection.py      # xx
-├── geojson_gen.py         # xx
-├── mesh.py                # xx
-├── temperature.py         # xx
-└── utils.py               # xx
+├── classes.py             # Calcula los indices y riesgo de cada celda
+├── coordinates.py         # Obtiene coordenadas del drone, trasnforma coordenadas de pixel a GPS
+├── display.py             # Colorea las celdas, kernel 3x3
+├── fire_detection.py      # Abre capturadora de video, obtiene imagen con incendios
+├── geojson_gen.py         # Genera los objetos tridimensionales para la visualizacion
+├── mesh.py                # Segmenta la imagen en una cuadricula de 16x9
+├── temperature.py         # Obtiene la informacion termica
+└── utils.py               # Hace las solicitudes a las APIs
 ```
 
 ## Requisitos
@@ -202,9 +202,10 @@ Se levanta una aplicación con Flask que permite visualizar:
 ## Licencias
 
 [Mapbox](token)            -->      Es necesario crear una cuenta y utilizar el token generado en `mapbox3d.html` y `utils.py`.
-[OpenWeather](key)         -->      xx
-[SentinelHub](user...)     -->      xx
-[etc]...
+[OpenWeather](key)         -->      Necesario obetenr tu API Key para los requests en `utils.py`.
+[SentinelHub](client Id)     -->      Necesario obtener tu Id de SentinelHub para `utils.py`.
+[SentinelHub](client secret)     -->      Necesario obtener tu client secret de SentinelHub para `utils.py`.
+[SentinelHub](Instance Id)     -->      Necesario obtener tu Instance Id de SentinelHub para `utils.py`.
 
 ## Autor
 
