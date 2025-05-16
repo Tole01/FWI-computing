@@ -1,6 +1,6 @@
 import cv2
 from ultralytics import YOLO
-import time
+import math
 
 def detect_fire(model, fire = 0):
     """
@@ -17,7 +17,7 @@ def detect_fire(model, fire = 0):
         img_optica (numpy array) Imagen de la cámara en el momento de detección.
         fire_coordinates: Lista de tuplas que contienen la coordenada (cx, cy) del centro del fuego
     """
-    # model = YOLO(r"fire_s.pt") #Modelo de deteccion entrenado
+    model = YOLO(r"fire_s.pt") #Modelo de deteccion entrenado
     cap = cv2.VideoCapture(0)  # Ajustar a cámara correspondiente
     if not cap.isOpened():
         print("No se pudo abrir la cámara.")
@@ -71,4 +71,59 @@ def detect_fire(model, fire = 0):
     cv2.destroyAllWindows()
 
     return img_optica,cx,cy,fire_coordinates
- 
+
+
+def map_optical_pixel_to_thermal(cx,cy,height,res_x_opt, res_y_opt,baseline =0.05):
+    """
+    Mapea las coordenadas ópticas (cx, cy) a las coordenadas térmicas (x, y).
+    Args:
+        cx (int): Coordenada x de interes en la imagen óptica.
+        cy (int): Coordenada y de interes en la imagen óptica.
+        height (float): Altura del dron.
+        res_x_opt (float): Resolución en x de la cámara óptica.
+        res_y_opt (float): Resolución en y de la cámara óptica.
+        baseline (float): Distancia entre las cámaras óptica y térmica en metros
+    Returns:
+        x (int): Coordenada x correspondiente en la imagen térmica.
+        y (int): Coordenada y correspondiente en la imagen térmica.
+    """
+    res_x_therm = 80 #pixeles de ancho de la imagen termica
+    res_y_therm = 60 #pixeles de alto de la imagen termica
+    fov_x_opt = 157.1 #Campo de visión en x de la cámara óptica
+    fov_y_opt = 140.4 #Campo de visión en y de la cámara óptica
+    fov_x_therm = 95 #Campo de visión en x de la cámara térmica
+    fov_y_therm = 71.25 #Campo de visión en y de la cámara térmica
+
+    # FOV a radianes
+    fx_opt = math.radians(fov_x_opt)
+    fy_opt = math.radians(fov_y_opt)
+    fx_therm = math.radians(fov_x_therm)
+    fy_therm = math.radians(fov_y_therm)
+
+    # Tamaño físico en el suelo (óptica)
+    width_opt = 2 * height * math.tan(fx_opt / 2)
+    height_opt = 2 * height * math.tan(fy_opt / 2)
+
+    # Tamaño físico en el suelo (térmica)
+    width_therm = 2 * height * math.tan(fx_therm / 2)
+    height_therm = 2 * height * math.tan(fy_therm / 2)
+
+    # Tamaño de píxel en el suelo
+    dx_opt = width_opt / res_x_opt
+    dy_opt = height_opt / res_y_opt
+    dx_therm = width_therm / res_x_therm
+    dy_therm = height_therm / res_y_therm
+
+    # Coordenadas físicas desde el centro óptico
+    X = (cx - res_x_opt / 2) * dx_opt
+    Y = (cy - res_y_opt / 2) * dy_opt
+
+    # Ajuste por desplazamiento entre cámaras (térmica a la izquierda en -X)
+    X_therm = X + baseline
+    Y_therm = Y
+
+    # Convertir coordenadas físicas a píxeles térmicos
+    dx = (X_therm / dx_therm) + res_x_therm / 2
+    dy = (Y_therm / dy_therm) + res_y_therm / 2
+
+    return dx, dy
