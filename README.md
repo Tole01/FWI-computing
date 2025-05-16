@@ -201,11 +201,9 @@ Se levanta una aplicación con Flask que permite visualizar:
 
 ## Licencias
 
-[Mapbox](token)            -->      Es necesario crear una cuenta y utilizar el token generado en `mapbox3d.html` y `utils.py`.
-[OpenWeather](key)         -->      Necesario obetenr tu API Key para los requests en `utils.py`.
-[SentinelHub](client Id)     -->      Necesario obtener tu Id de SentinelHub para `utils.py`.
-[SentinelHub](client secret)     -->      Necesario obtener tu client secret de SentinelHub para `utils.py`.
-[SentinelHub](Instance Id)     -->      Necesario obtener tu Instance Id de SentinelHub para `utils.py`.
+Mapbox            -->      Es necesario crear una cuenta y utilizar el token generado en `mapbox3d.html` y `utils.py`.
+OpenWeather       -->      Necesario obtener tu API Key para los requests en `utils.py`.
+SentinelHub       -->      Necesario obtener tu Client ID, Client Secret e Instance ID de SentinelHub para `utils.py`.
 
 ## Autor
 
