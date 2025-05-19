@@ -69,6 +69,7 @@ def generar_geojson(coord_list):
         features.append(feature)
 
     geojson_obj = geojson.FeatureCollection(features)
+    print(geojson_obj)
 
     with open("riesgo.geojson", "w") as f:
         geojson.dump(geojson_obj, f)

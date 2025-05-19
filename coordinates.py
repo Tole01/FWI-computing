@@ -22,7 +22,7 @@ def get_coordinates():
                 alt = msg.alt / 1000.0     # Convertir de milímetros a metros
 
                 # Imprimir las coordenadas
-                print(f"📍 Latitud: {lat:.6f}, Longitud: {lon:.6f}, Altura: {alt:.2f} m")
+                print(f"📍 Latitud: {lat}, Longitud: {lon}, Altura: {alt:.2f} m")
                 return lat, lon, alt
 
     except KeyboardInterrupt:
@@ -74,5 +74,4 @@ def pixel_to_gps(pixel_x, pixel_y, img_width, img_height, height_m, drone_lat, d
     new_lat = drone_lat + delta_lat
     new_lon = drone_lon + delta_lon
 
-    # Rounds up to a precision of 5 decimal places (1.11 m)
-    return round(new_lat, 6), round(new_lon, 6)
+    return new_lat,new_lon

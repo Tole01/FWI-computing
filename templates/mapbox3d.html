@@ -21,7 +21,7 @@
   const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/satellite-v9',
-    center: [0, 0],
+    center: [-99, 19],
     zoom: 10,
     pitch: 45,
     bearing: -17.6,
@@ -42,7 +42,8 @@
         'fill-extrusion-color': [
           'interpolate', ['linear'], ['get', 'riesgo'],
           0, '#FFFCC6',
-          0.5, '#FDC563',
+          0.42, '#FDC563',
+          0.55, '#A80024',
           1, '#A80024'
         ],
         'fill-extrusion-height': [
@@ -50,7 +51,7 @@
           0, 0,
           1, 75
         ],
-        'fill-extrusion-opacity': 0.5
+        'fill-extrusion-opacity': 0.6
       }
     });
 
