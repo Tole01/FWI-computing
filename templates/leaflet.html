@@ -23,7 +23,7 @@
         const geojsonLayer = L.geoJSON(data, {
           style: feature => {
             const riesgo = feature.properties.riesgo;
-            const color = riesgo > 0.7 ? '#A80024' : riesgo > 0.4 ? '#FDC563' : '#FFFCC6';
+            const color = riesgo > 0.55 ? '#A80024' : riesgo > 0.42 ? '#FDC563' : '#FFFCC6';
             return { color, fillColor: color, fillOpacity: 0.5 };
           }
         }).addTo(map);
