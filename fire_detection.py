@@ -73,7 +73,7 @@ def detect_fire(model, fire = 0):
     return img_optica,cx,cy,fire_coordinates
 
 
-def map_optical_pixel_to_thermal(cx,cy,height,res_x_opt, res_y_opt,baseline =0.05):
+def map_optical_pixel_to_thermal(cx,cy,height,res_x_opt, res_y_opt,baseline =0.031):
     """
     Mapea las coordenadas ópticas (cx, cy) a las coordenadas térmicas (x, y).
     Args:
