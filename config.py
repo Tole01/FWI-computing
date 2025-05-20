@@ -5,8 +5,8 @@ FOV_TERMICA_HORIZONTAL = 24  # en grados
 FOV_TERMICA_VERTICAL = 18    # en grados
 
 # Resoluciones de imagen
-THERMAL_WIDTH = 24
-THERMAL_HEIGHT = 32
+THERMAL_WIDTH = 80
+THERMAL_HEIGHT = 60
 
 # Puertos de conexión
 COM_ANTENA = 'COM3' # puerto donde se conecta la antena del dron
