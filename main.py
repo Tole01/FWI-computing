@@ -18,8 +18,8 @@ model = YOLO(r"fire_s.pt")
 fire_img, cx, cy, fire_coordinates = detect_fire(model) 
 print(fire_coordinates)
 
-thermal_matrix = get_temp_matrix() # Obtener temperatura de cada coordenada (en pixel)
-#thermal_matrix = [    [135, 100,  40,  60,  80, 135,  30,  30,  60, 125, 130, 130, 130,  90,  60,  25],    [130, 115, 140,  65, 135,  75, 110,  30,  25,  65,  25,  25,  25, 130, 130,  70],    [130, 125,  35, 130, 130, 130, 115,  30, 135, 135, 105,  25,  25,  35,  35,  25],    [ 40,  80, 130,  87,  25, 131,  75, 130, 135,  85,  70,  25,  25,  25,  25,  25],    [130,  25, 120, 130, 130, 132, 130, 135, 100,  25, 100, 100, 115,  25,  25,  25],    [135, 120, 125,  25,  25, 130,  25, 100,  25,  25,  95, 100, 107,  85,  25,  25],    [ 85, 110,  85, 115, 135,  25,  25,  25,  25,  25,  25, 100, 135, 130,  45,  25],    [ 25,  25,  25, 115, 130,  25,  25,  25, 100, 120, 120,  90, 135,  90, 135,  30],    [ 30,  30,  30,  30,  30,  30,  30,  35,  40,  35,  60,  35,  90, 130,  95,  30]]
+#thermal_matrix = get_temp_matrix() # Obtener temperatura de cada coordenada (en pixel)
+thermal_matrix = [    [135, 100,  40,  60,  80, 135,  30,  30,  60, 125, 130, 130, 130,  90,  60,  25],    [130, 115, 140,  65, 135,  75, 110,  30,  25,  65,  25,  25,  25, 130, 130,  70],    [130, 125,  35, 130, 130, 130, 115,  30, 135, 135, 105,  25,  25,  35,  35,  25],    [ 40,  80, 130,  87,  25, 131,  75, 130, 135,  85,  70,  25,  25,  25,  25,  25],    [130,  25, 120, 130, 130, 132, 130, 135, 100,  25, 100, 100, 115,  25,  25,  25],    [135, 120, 125,  25,  25, 130,  25, 100,  25,  25,  95, 100, 107,  85,  25,  25],    [ 85, 110,  85, 115, 135,  25,  25,  25,  25,  25,  25, 100, 135, 130,  45,  25],    [ 25,  25,  25, 115, 130,  25,  25,  25, 100, 120, 120,  90, 135,  90, 135,  30],    [ 30,  30,  30,  30,  30,  30,  30,  35,  40,  35,  60,  35,  90, 130,  95,  30]]
 
 normalized_matrix = normalize_temperature(thermal_matrix) # Normalizar la matriz de temperatura
 print(normalized_matrix)
@@ -29,8 +29,8 @@ cv2.waitKey(5000)
 cv2.destroyAllWindows()
 
 # Coordenadas que se obtendran de ardupilot
-drone_lat,drone_lon,drone_height = get_coordinates() #el de verdad
-#drone_lat,drone_lon,drone_height = 25.64933, -100.28890, 30 # coord TEC para el ejemplo
+#drone_lat,drone_lon,drone_height = get_coordinates() #el de verdad
+drone_lat,drone_lon,drone_height = 25.64933, -100.28890, 30 # coord TEC para el ejemplo
 #drone_lat,drone_lon,drone_height = 34.1915277778, -118.1319999999, 50 # coord LA para el ejemplo
 # Coordenadas del incendio -> Input para EQUIPO 2
 lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon, FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL)
