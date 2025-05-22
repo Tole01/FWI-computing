@@ -1,5 +1,5 @@
 from fire_detection import detect_fire
-from mesh import mesh_segmentation
+from mesh import mesh_segmentation2
 from display import NNI_kernel, colorear_celdas
 import cv2
 import numpy as np
@@ -38,7 +38,7 @@ for cx, cy in hotspots:
 lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon, FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL)
 
 # Análisis de Mallado
-rsk, coord_list = mesh_segmentation(fire_img, thermal_matrix, drone_lat, drone_lon, drone_height)
+rsk, coord_list = mesh_segmentation2(fire_img, drone_lat, drone_lon, drone_height,hotspots,hotspot_location,t_amb)
 rsk_image = colorear_celdas(fire_img, rsk,fire_coordinates)
 cv2.imshow("Fire risk output", rsk_image)
 cv2.waitKey(0)

@@ -3,23 +3,22 @@ from config import COM_ESP
 import time
 import numpy as np
 from scipy.ndimage import label, center_of_mass
+from coordinates import hotspot_en_area
 
-def get_temperature(matrix, x, y):
-    '''
-    Obtiene la temperatura de una matriz de temperaturas en una posición específica.
+def get_temperature(coordinates, hotspots,hotspot_location,t_amb):
 
-    :param matrix: Lista de listas que representa la matriz de temperaturas.
-    :param x: Coordenada x (columna) en la matriz.
-    :param y: Coordenada y (fila) en la matriz.
-    :return: Temperatura en la posición (x, y).
-    '''
-    matrix = normalize_temperature(matrix)
+    temp_array = []
+    dx = coordinates[0][1][0] - coordinates[0][0][0] 
+    dy = coordinates[1][0][1] - coordinates[0][0][1]
 
-    if 0 <= y < len(matrix) and 0 <= x < len(matrix[0]):
-        return matrix[y][x]
-    else:
-        raise IndexError("Coordenadas fuera de los límites de la matriz.")
+    for col in range(coordinates.shape[1]):
+        for row in range(coordinates.shape[0]):
+            lat, lon = coordinates[row][col]
+            lat2, lon2 = lat + dx, lon + dy
+            dentro = hotspot_en_area(hotspot_location,lat,lon,lat2,lon2)
     
+    
+    return temp_array
 
 def normalize_temperature(matrix):
     """

@@ -4,13 +4,14 @@ from classes import meshCell
 from coordinates import pixel_to_gps, pixel_to_gps_vectorized
 from utils import get_weather_data, get_ndvi, get_slope, calculate_risk_score
 from classes import calculate_fwi
+from temperature import get_temperature
 
 weights = {}
 
 # Camera resolution parameters (substitute for Walksnail Moonlight)
 fov_x_deg, fov_y_deg = 157, 140
 
-def mesh_segmentation(image, drone_lat, drone_lon, height_m, x_columns = 16, y_rows = 9):
+def mesh_segmentation(image, drone_lat, drone_lon, height_m, hotspots,hotspot_location,t_amb,x_columns = 16, y_rows = 9):
     '''Generates a mesh of a specified cell number according to the chosen resolution, and 
      computes the parameters and risk score for each cell.
      
@@ -67,7 +68,7 @@ def mesh_segmentation(image, drone_lat, drone_lon, height_m, x_columns = 16, y_r
     return mesh, coord_list
 
 
-def mesh_segmentation2(image, d_lat, d_lon, d_height, x_columns = 16, y_rows = 9):
+def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t_amb, x_columns = 16, y_rows = 9):
     '''
     Generates the mesh analysis from the image taken by the optical camera. 
 
@@ -81,7 +82,7 @@ def mesh_segmentation2(image, d_lat, d_lon, d_height, x_columns = 16, y_rows = 9
     # Generate GPS coordinates mesh
     coords = generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height)
     # Compute Indices
-    indices = compute_indices(coords)
+    indices = compute_indices(coords, hotspots,hotspot_location,t_amb)
     # Computes risk score
     risk = compute_riskscore(indices)
 
@@ -122,7 +123,7 @@ def generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height):
 
     return coords
 
-def compute_indices(coordinates):
+def compute_indices(coordinates, hotspots,hotspot_location,t_amb):
     '''
     Generates an indices array containing (ndvi, slope, thermal, bui) values.
 
@@ -141,7 +142,7 @@ def compute_indices(coordinates):
     # Vectorize all of the functions
     get_ndvi_vectorized = np.vectorize(get_ndvi)
     get_slope_vectorized = np.vectorize(get_slope)
-    # get_thermal_vectorized -> Checar integracion
+    get_thermal_vectorized = np.vectorize(get_temperature)
     get_weather_data_vectorized = np.vectorize(get_weather_data)
     get_fwi_vectorized = np.vectorize(calculate_fwi)
 
@@ -149,7 +150,7 @@ def compute_indices(coordinates):
     # Call API's on the input arrays
     try:
         print('Starting to compute APIs...')
-
+        temp = get_thermal_vectorized(coordinates, hotspots,hotspot_location,t_amb)
         ndvi = get_ndvi_vectorized(lat, lon)
         slopes = get_slope_vectorized(lat, lon)
         weather = get_weather_data_vectorized(lat, lon)
@@ -162,7 +163,7 @@ def compute_indices(coordinates):
 
 
     # Combine parameters into a single array
-    indices = np.stack((ndvi, slopes, bui), axis=-1)
+    indices = np.stack((ndvi, slopes, temp, bui), axis=-1)
 
     return indices 
 
@@ -187,8 +188,8 @@ def compute_riskscore(indices):
      
     NDVI = indices[:, :, 0]  # All NDVI values (9 x 16) shape
     SLOPE = indices[:, :, 1] # All Slope values
-    THERMAL = None           # All Thermal values / Modify implementation
-    BUI = indices[:, :, 2]   # All BUI values
+    THERMAL = indices[:, :, 2]  # All Thermal values / Modify implementation
+    BUI = indices[:, :, 3]   # All BUI values
 
     return NDVI * weights['NDVI'] + SLOPE * weights['SLOPE'] + BUI * weights['BUI']
      

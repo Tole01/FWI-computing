@@ -126,3 +126,21 @@ def pixel_to_gps_vectorized(y_pixels, x_pixels, img_width, img_height, d_height,
     new_lons = np.round( (d_lon + delta_lons), 6)
 
     return new_lats, new_lons
+
+def hotspot_en_area(hotspots, lat_sup_izq, lon_sup_izq, lat_inf_der, lon_inf_der):
+    """
+    Verifica si algún hotspot está dentro del rectángulo definido por dos esquinas GPS.
+    """
+    lat_min = min(lat_sup_izq, lat_inf_der)
+    lat_max = max(lat_sup_izq, lat_inf_der)
+    lon_min = min(lon_sup_izq, lon_inf_der)
+    lon_max = max(lon_sup_izq, lon_inf_der)
+
+    encontrados = []
+    for lat, lon in hotspots:
+        if lat_min <= lat <= lat_max and lon_min <= lon <= lon_max:
+            encontrados.append((lat, lon))
+
+    return encontrados  # Lista de hotspots que sí están dentro del área
+
+
