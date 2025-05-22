@@ -2,6 +2,7 @@ import serial
 from config import COM_ESP
 import time
 import numpy as np
+from scipy.ndimage import label, center_of_mass
 
 def get_temperature(matrix, x, y):
     '''
@@ -37,7 +38,7 @@ def normalize_temperature(matrix):
     return normalized_matrix
 
 
-def get_temp_matrix(puerto='COM3', baudios=115200, timeout=10):
+def get_temp_matrix(puerto=COM_ESP, baudios=115200, timeout=10):
     try:
         ser = serial.Serial(puerto, baudios, timeout=1)
     except serial.SerialException as e:
@@ -62,7 +63,7 @@ def get_temp_matrix(puerto='COM3', baudios=115200, timeout=10):
                 buffer = buffer.split("<START>")[1]
                 break
 
-    print("✅ <START> detectado. Leyendo datos hasta <END>...")
+    print("<START> detectado. Leyendo datos hasta <END>...")
 
     # Leer hasta <END>
     while "<END>" not in buffer:
@@ -82,3 +83,41 @@ def get_temp_matrix(puerto='COM3', baudios=115200, timeout=10):
     except Exception as e:
         print(f"Error al convertir a matriz: {e}")
         return None
+
+
+def detectar_hotspots(matriz_temp, tamano_minimo=3):
+    """
+    Detecta hotspots en una matriz de temperaturas.
+
+    Parámetros:
+    - matriz_temp: np.ndarray de forma (60, 80), con temperaturas en °C.
+    - margen: diferencia mínima en °C respecto a la temperatura ambiente para considerar un hotspot.
+    - tamano_minimo: tamaño mínimo (en píxeles) para que un cluster sea considerado un hotspot.
+
+    Retorna:
+    - Lista de tuplas (fila, columna) que representan el centro de cada hotspot detectado.
+    - temperatura ambiente calculada como la mediana de la matriz.
+    """
+    # Calcular la temperatura ambiente como la mediana de la matriz
+    temp_ambiente = np.median(matriz_temp)
+
+    margen = .25* temp_ambiente
+
+    # Crear una máscara binaria donde las temperaturas superan el umbral
+    mascara = matriz_temp > (temp_ambiente + margen)
+
+    # Etiquetar las regiones conectadas en la máscara
+    estructura = np.ones((3, 3), dtype=int)  # Conectividad de 8 vecinos
+    etiquetas, num_etiquetas = label(mascara, structure=estructura)
+
+    # Calcular el centro de masa de cada región etiquetada
+    centros = center_of_mass(mascara, etiquetas, range(1, num_etiquetas + 1))
+
+    # Filtrar los hotspots por tamaño mínimo
+    hotspots = []
+    for i, centro in enumerate(centros):
+        if np.sum(etiquetas == (i + 1)) >= tamano_minimo:
+            fila, columna = centro
+            hotspots.append((int(round(fila)), int(round(columna))))
+
+    return hotspots, temp_ambiente
