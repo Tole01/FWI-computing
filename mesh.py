@@ -1,8 +1,7 @@
-import cv2
 import numpy as np
 from classes import meshCell
 from coordinates import pixel_to_gps, pixel_to_gps_vectorized
-from utils import get_weather_data, get_ndvi, get_slope, calculate_risk_score
+from utils import get_weather_data, get_ndvi, get_slope
 from classes import calculate_fwi
 from temperature import get_temperature
 
