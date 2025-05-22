@@ -48,7 +48,7 @@ def colorear_celdas(imagen, matriz, fire_coordinates):
             cv2.rectangle(overlay, (x1, y1), (x2, y2), color, -1)
     
     for x, y in fire_coordinates:
-        color = (161, 0, 102)  # Verde (BGR)
+        color = (161, 0, 102)  # (BGR)
         center = (x,y)
         radio = 20
         cv2.circle(overlay, center, radio, color, -1)

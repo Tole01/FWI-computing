@@ -1,12 +1,12 @@
 # Parámetros de las cámaras
-FOV_OPTICA_HORIZONTAL = 57  # en grados
-FOV_OPTICA_VERTICAL = 43    # en grados
-FOV_TERMICA_HORIZONTAL = 24  # en grados
-FOV_TERMICA_VERTICAL = 18    # en grados
+FOV_OPTICA_HORIZONTAL = 157.1  # en grados
+FOV_OPTICA_VERTICAL = 140.4    # en grados
+FOV_TERMICA_HORIZONTAL = 95  # en grados
+FOV_TERMICA_VERTICAL = 71    # en grados
 
 # Resoluciones de imagen
-THERMAL_WIDTH = 24
-THERMAL_HEIGHT = 32
+THERMAL_WIDTH = 160
+THERMAL_HEIGHT = 120
 
 # Puertos de conexión
 COM_ANTENA = 'COM3' # puerto donde se conecta la antena del dron

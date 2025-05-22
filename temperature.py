@@ -24,10 +24,10 @@ def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix)
                     cx, cy = hotspots[idx]
                     hotspot_temp = thermal_matrix[cx][cy]
                 
-                temp_array[row][col] = hotspot_temp
+                temp_array[row][col] = (hotspot_temp +10) / 150 #normalizar entre 0 y 1
             else:
                 # Si no está dentro de un hotspot, asignar la temperatura ambiente
-                temp_array[row][col] = t_amb
+                temp_array[row][col] = (t_amb +10) / 150 #normalizar entre 0 y 1
     
     return temp_array
 

@@ -2,16 +2,14 @@ from fire_detection import detect_fire
 from mesh import mesh_segmentation2
 from display import NNI_kernel, colorear_celdas
 import cv2
-import numpy as np
 from ultralytics import YOLO
 from coordinates import pixel_to_gps
 from geojson_gen import generar_geojson
 from flask import Flask, render_template, send_from_directory
 from coordinates import get_coordinates
 from temperature import get_temp_matrix, detectar_hotspots
-import seaborn as sns
 import matplotlib.pyplot as plt
-from config import FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL, FOV_TERMICA_HORIZONTAL, FOV_TERMICA_VERTICAL
+from config import FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL, FOV_TERMICA_HORIZONTAL, FOV_TERMICA_VERTICAL ,THERMAL_WIDTH, THERMAL_HEIGHT
 
 # Inicialización del proceso de detección incendio a través de cámara óptica y térmica YOLOv8
 model = YOLO(r"fire_s.pt")
@@ -25,17 +23,19 @@ cv2.imshow("Imagen Óptica Capturada", fire_img)
 cv2.waitKey(5000)
 cv2.destroyAllWindows()
 
-drone_lat,drone_lon,drone_height = 25.64933, -100.28890, 30 #para el ejemplo
+#drone_lat,drone_lon,drone_height = 25.64933, -100.28890, 30 # para el ejemplo
 
 hotspots, t_amb = detectar_hotspots(thermal_matrix)
 hotspot_location = []
 for cx, cy in hotspots:
-    lat,lon = pixel_to_gps(cx,cy,160,120,drone_height,drone_lat,drone_lon,FOV_TERMICA_HORIZONTAL, FOV_TERMICA_VERTICAL)
+    lat,lon = pixel_to_gps(cx,cy,THERMAL_WIDTH,THERMAL_HEIGHT,drone_height,drone_lat,drone_lon,FOV_TERMICA_HORIZONTAL, FOV_TERMICA_VERTICAL)
     hotspot_location.append((lat,lon))
     print(f"Hotspot: Latitud: {lat}, Longitud: {lon}")
 
+img_height, img_width = fire_img.shape[:2]
+
 # Coordenadas del incendio -> Input para EQUIPO 2
-lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon, FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL)
+lat_fire, lon_fire = pixel_to_gps(cx,cy,img_height,img_width,drone_height,drone_lat,drone_lon, FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL)
 
 # Análisis de Mallado
 rsk, coord_list = mesh_segmentation2(fire_img, drone_lat, drone_lon, drone_height,hotspots,hotspot_location,t_amb, thermal_matrix)
