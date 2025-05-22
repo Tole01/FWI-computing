@@ -7,14 +7,12 @@ from coordinates import pixel_to_gps
 from geojson_gen import generar_geojson
 from flask import Flask, render_template, send_from_directory
 from coordinates import get_coordinates
-from temperature import get_temp_matrix, detectar_hotspots
 import matplotlib.pyplot as plt
 from config import FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL, FOV_TERMICA_HORIZONTAL, FOV_TERMICA_VERTICAL ,THERMAL_WIDTH, THERMAL_HEIGHT
 
 # Inicialización del proceso de detección incendio a través de cámara óptica y térmica YOLOv8
 model = YOLO(r"fire_s.pt")
-fire_img, cx, cy, fire_coordinates = detect_fire(model) #imagen optica, centroides de incendios
-thermal_matrix = get_temp_matrix() # Obtener temperatura 120X160
+fire_img, cx, cy, fire_coordinates,hotspots,t_amb,thermal_matrix = detect_fire(model) #imagen optica, centroides de incendios
 drone_lat,drone_lon,drone_height = get_coordinates() # Coordenadas del drone
 
 print(fire_coordinates)
@@ -25,7 +23,6 @@ cv2.destroyAllWindows()
 
 #drone_lat,drone_lon,drone_height = 25.64933, -100.28890, 30 # para el ejemplo
 
-hotspots, t_amb = detectar_hotspots(thermal_matrix)
 hotspot_location = []
 for cx, cy in hotspots:
     lat,lon = pixel_to_gps(cx,cy,THERMAL_WIDTH,THERMAL_HEIGHT,drone_height,drone_lat,drone_lon,FOV_TERMICA_HORIZONTAL, FOV_TERMICA_VERTICAL)
