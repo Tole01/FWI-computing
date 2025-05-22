@@ -86,7 +86,7 @@ def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t
     # Computes risk score
     risk = compute_riskscore(indices)
 
-    return risk 
+    return risk, coords
 
 
     # Compute indices / Call API's from coords

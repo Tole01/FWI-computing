@@ -25,7 +25,7 @@ cv2.imshow("Imagen Óptica Capturada", fire_img)
 cv2.waitKey(5000)
 cv2.destroyAllWindows()
 
-#drone_lat,drone_lon,drone_height = 25.64933, -100.28890, 30 #para el ejemplo
+drone_lat,drone_lon,drone_height = 25.64933, -100.28890, 30 #para el ejemplo
 
 hotspots, t_amb = detectar_hotspots(thermal_matrix)
 hotspot_location = []
