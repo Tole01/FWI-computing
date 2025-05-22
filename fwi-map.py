@@ -7,9 +7,9 @@ import datetime
 
 def risk_score(ndvi,slope,thermal):
 
-    ndviWeight = 0.6
-    slopeWeight = 0.4
-    thermalWeight = 0.1
+    ndviWeight = 3.8987
+    slopeWeight = 1.3073
+    thermalWeight = 2.3786
 
     #Conversión a °C en caso de ser necesario
     thermal = (thermal*0.2) - 273.15
@@ -18,9 +18,9 @@ def risk_score(ndvi,slope,thermal):
     return score
 
 def visualizar_riesgo(ndvi,slope,lst_image):
-    ndviWeight = 0.3
-    slopeWeight = 0.4
-    thermalWeight = 0.5
+    ndviWeight = 3.8987
+    slopeWeight = 1.3073
+    thermalWeight = 2.3786
 
     #Cálculo del índice de riesgo como imagen en EE
     riesgo_img = ndvi.multiply(ndviWeight).add(slope.multiply(slopeWeight)).add(lst_image.multiply(thermalWeight)).rename("Riesgo")
@@ -59,24 +59,20 @@ hoy = datetime.date.today()
 #inicio = ee.Date(str(hoy - datetime.timedelta(days=7)))
 #fin = ee.Date(str(hoy))
 #Debido a que algunas bases de datos tienen retraso de unas semanas, se van a usar las siguientes fechas
-inicio = '2025-03-15'
-fin = '2025-04-15'
+inicio = '2025-04-2'
+fin = '2025-05-2'
 
 #Importar datos de NDVI
 # MODIS/061/MOD13Q1 --> Base de datos de NDVI con cadencia de 16 días
-#ndvi = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED").filterBounds(punto) \
-#    .filterDate('2024-01-01', '2025-12-31') \
-#    .select('NDVI') \
-#    .sort('system:time_start', False) \
-#    .first().clip(area)
-ndvi = ee.ImageCollection('MODIS/061/MOD13Q1').filterDate('2024-01-01', '2025-12-31').select('NDVI').sort('system:time_start',False)\
+
+ndvi = ee.ImageCollection('MODIS/061/MOD13Q1').filterDate(inicio, fin).select('NDVI').sort('system:time_start',False)\
 .mean().clip(area)
 
 #Importar datos de Temperatura de Superficie Terrestre
 
 modis = ee.ImageCollection("MODIS/061/MOD11A1") \
     .filterBounds(punto) \
-    .filterDate('2024-01-01', '2025-12-31') \
+    .filterDate(inicio, fin) \
     .sort('system:time_start', False) \
     .first()
 lst_image = modis.select('LST_Day_1km').multiply(0.02).subtract(273.15).rename('Temperatura_C').clip(area)
@@ -128,6 +124,21 @@ for feature in datos['features']:
 
     #Cálculo de índice de riesgo
     riesgo_estimado = risk_score(valor_ndvi,valor_pendiente_rad,valor_temp)
+    if riesgo_estimado <= 10000:
+        nivel = "Muy Bajo"
+    elif riesgo_estimado <= 14000:
+        nivel = "Bajo"
+    elif riesgo_estimado <= 17000:
+        nivel = "Moderado"
+    elif riesgo_estimado <= 20000:
+        nivel = "Alto"
+    elif riesgo_estimado <= 25000:
+        nivel = "Muy Alto"
+    else:
+        nivel = "Extremo"
+
+    print(f"Índice de riesgo: {riesgo_estimado:.2f} ({nivel})")
+
     riesgo_mapa = visualizar_riesgo(ndvi,slope,lst_image)
     print(f"Coordenadas: {coords}")
     print(f"NDVI: {valor_ndvi}, Temp: {valor_temp} °C, Viento: {valor_wind} m/s, Pendiente: {valor_pendiente}°")
@@ -138,7 +149,7 @@ for feature in datos['features']:
 mapa_de_calor = geemap.Map(center=[lat,long], zoom = 15)
 
 #Agregamos el riesgo estimado al mapa recién creado
-riesgo_vis = {'min': 0,'max': 5000,'palette': ['00ff00', 'ffff00', 'ff9900', 'ff0000']}  # Verde -> Rojo
+riesgo_vis = {'min': 9000,'max': 25000,'palette': ['00ff00', '66ff00', '99ff00', 'ccff00','ffff00','ffcc00','ff9900','ff6600','ff3300','ff0000']}  # Verde -> Rojo
 
 mapa_de_calor.addLayer(riesgo_mapa,riesgo_vis, "Índice de Riesgo de Incendio", opacity=0.85)
 mapa_de_calor.addLayer(area, {},'Área analizada')
@@ -148,13 +159,9 @@ mapa_de_calor.to_html('fwi-heatmap.html')
 webbrowser.open('fwi-heatmap.html')
 #mapa_de_calor.add_colorbar(vis_params=riesgo_vis, label='Índice de Riesgo')
 
-
-
 # Save the map as HTML
 html_file = "fwi-heatmap.html"
 mapa_de_calor.to_html(html_file)
-
-
 
 # Define the color bar HTML
 colorbar_html = """
@@ -163,37 +170,53 @@ colorbar_html = """
         position: absolute;
         bottom: 10px;
         right: 10px;
-        width: 300px;
+        width: 400px;
         padding: 5px;
-        background: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.9);
         border: 1px solid black;
         z-index: 1000;
+        font-family: Arial, sans-serif;
     }
     .colorbar {
         width: 100%;
         height: 30px;
-        background: linear-gradient(to right, #00ff00, #ffff00, #ff9900, #ff0000);
+        background: linear-gradient(to right,
+            #00ff00,
+            #66ff00,
+            #99ff00,
+            #ccff00,
+            #ffff00,
+            #ffcc00,
+            #ff9900,
+            #ff6600,
+            #ff3300,
+            #ff0000
+        );
     }
     .labels {
         display: flex;
         justify-content: space-between;
-        font-size: 12px;
-        margin-top: 3px;
+        font-size: 10px;
+        margin-top: 4px;
     }
 </style>
 <div class="colorbar-container">
     <div class="colorbar"></div>
     <div class="labels">
-        <span>Low Risk</span>
-        <span>Medium</span>
-        <span>High</span>
-        <span>Extreme</span>
+        <span>Muy bajo</span>
+        <span> </span>
+        <span>Bajo</span>
+        <span> </span>
+        <span>Moderado</span>
+        <span> </span>
+        <span>Alto</span>
+        <span> </span>
+        <span>Muy Alto</span>
+        <span> </span>
     </div>
 </div>
+
 """
-
-
-
 # Append color bar to the generated HTML file
 with open(html_file, "r+", encoding="utf-8") as file:
     content = file.read()
@@ -247,8 +270,6 @@ slider_html = """
     waitForMap();
 </script>
 """ % (lat, long)
-
-
 
 # Insertarlo al HTML exportado
 with open(html_file, "r+", encoding="utf-8") as file:
