@@ -1,7 +1,11 @@
 import cv2
 import numpy as np
 from classes import meshCell
-from coordinates import pixel_to_gps
+from coordinates import pixel_to_gps, pixel_to_gps_vectorized
+from utils import get_weather_data, get_ndvi, get_slope, calculate_risk_score
+from classes import calculate_fwi
+
+weights = {}
 
 # Camera resolution parameters (substitute for Walksnail Moonlight)
 fov_x_deg, fov_y_deg = 157, 140
@@ -74,15 +78,132 @@ def mesh_segmentation2(image, d_lat, d_lon, d_height, x_columns = 16, y_rows = 9
 
 
     '''
+    # Generate GPS coordinates mesh
+    coords = generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height)
+    # Compute Indices
+    indices = compute_indices(coords)
+    # Computes risk score
+    risk = compute_riskscore(indices)
+
+    return risk 
+
+
+    # Compute indices / Call API's from coords
+
+
+
+def generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height):
+    '''
+    Generates a Coordinates Mesh where each element in the mesh represent a (lat, lon) pair.
+
+    Input: image     -> Optical image taken from the sensor (Numpy Array)
+           x_columns -> Number of mesh columns (integer)
+           y_rows    -> Number of mesh rows    (integer)
+
+    Output: 3-D Numpy array of size (height x width x 2) 
+            where each element is a 1-D Numpy array containing (lat, lon) pairs.
+    '''
     # Display image attributes
+    img_height, img_width, channels = image.shape
+    print(f'Image Resolution: ({img_height} x {img_width}) pixels')
+
+    x_res, y_res = (img_width / x_columns), (img_height / y_rows)
+
+    # Generate custom mesh with corresponding resolution
+    y_pixels, x_pixels = np.mgrid[0:img_height:y_res, 
+                                  0:img_width:x_res]
     
+    # Apply pixel_to_gps function to bothp y, x pixel arrays
+    lats, lons = pixel_to_gps_vectorized(y_pixels, x_pixels, img_width, 
+                                       img_height, d_height, d_lat, d_lon)
+   
+    # Stack both arrays to generate a 3-D array with (lat, lon) pairs as items
+    coords = np.stack((lats, lons), axis=-1)
 
-    # Generate Mesh with 
+    return coords
 
-    mesh = coordinate_mesh(image, x_columns, y_rows)
+def compute_indices(coordinates):
+    '''
+    Generates an indices array containing (ndvi, slope, thermal, bui) values.
+
+    Input: 
+        coordinates -> 3D Numpy array containing (lat, lon) pairs of each cell.
+
+    Output:
+        indices -> 3D Numpy array of shape (height x width x 4) containing (ndvi, slope thermal, bui) 
+        values stored as 1D arrays.
+    '''
+    assert coordinates.shape == (9, 16, 2), "Input array dimensions are incorrect"
+    # Access lat, lon arrays
+    lat = coordinates[:, :, 0]
+    lon = coordinates[:, :, 1]
+    
+    # Vectorize all of the functions
+    get_ndvi_vectorized = np.vectorize(get_ndvi)
+    get_slope_vectorized = np.vectorize(get_slope)
+    # get_thermal_vectorized -> Checar integracion
+    get_weather_data_vectorized = np.vectorize(get_weather_data)
+    get_fwi_vectorized = np.vectorize(calculate_fwi)
 
 
-def coordinate_mesh(image, x_columns, y_rows):
+    # Call API's on the input arrays
+    try:
+        print('Starting to compute APIs...')
+
+        ndvi = get_ndvi_vectorized(lat, lon)
+        slopes = get_slope_vectorized(lat, lon)
+        weather = get_weather_data_vectorized(lat, lon)
+        fwi = get_fwi_vectorized = (weather)
+        bui = np.vectorize(lambda array: array['BUI'], otypes=[float])(fwi)
+
+    except Exception as e:
+        print(f'There was an error calling the APIs: {e}')
+        raise
+
+
+    # Combine parameters into a single array
+    indices = np.stack((ndvi, slopes, bui), axis=-1)
+
+    return indices 
+
+weights = {'NDVI': 0.23, 'SLOPE': 0.03, 'THERMAL': 0.48, 'BUI': 0.26}
+
+def compute_riskscore(indices):
+    '''
+    Computes the risk score for each mesh cell through vectorization.
+
+    Input:
+            indices -> 3D Numpy array containing as items the indices (ndvi, slope, thermal, bui) as 1D arrays
+    Output:
+            risk_score -> 2D Numpy array containing as items the risk score for each row
+
+            0th item in array -> NDVI
+            1st -> SLOPE
+            2nd -> THERMAL
+            3rd -> BUI
+    ''' 
+    assert isinstance(indices, np.ndarray), "Indices must be a Numpy Array"
+    assert indices.shape == (9, 16, 3), "Array doesn't have correct dimensions"
+     
+    NDVI = indices[:, :, 0]  # All NDVI values (9 x 16) shape
+    SLOPE = indices[:, :, 1] # All Slope values
+    THERMAL = None           # All Thermal values / Modify implementation
+    BUI = indices[:, :, 2]   # All BUI values
+
+    return NDVI * weights['NDVI'] + SLOPE * weights['SLOPE'] + BUI * weights['BUI']
+     
+
+
+
+
+
+
+
+def vectorize_function(functions):
+    '''
+    Vectorizes a given function as input. 
+    '''
+    pass
 
 
 

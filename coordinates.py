@@ -1,5 +1,6 @@
 from pymavlink import mavutil
 from config import COM_ANTENA
+import numpy as np
 import math
 
 def get_coordinates():
@@ -78,5 +79,50 @@ def pixel_to_gps(pixel_x, pixel_y, img_width, img_height, height_m, drone_lat, d
     return round(new_lat, 6), round(new_lon, 6)
 
 
-def pixel_to_gps_vectorized():
-    pass 
+def pixel_to_gps_vectorized(y_pixels, x_pixels, img_width, img_height, d_height, d_lat, d_lon, fov_x_deg = 157, fov_y_deg = 140):
+    """
+    Converts y, x pixel coordinates arrays into GPS coordinates. 
+
+    Input: 
+        y_pixels -> y pixel coordinates (Numpy Array)
+        x_pixels -> x pixel coordinates (Numpy Array)
+        img_width -> image resolution / x axis (int)
+        img_height -> image resolution / y axis (int)
+        d_height -> Drone height (int)
+        d_lat -> Drone latitute coordinate (float)
+        d_lon -> Drone longitude coordinate (float)
+
+    Output:
+        Tuple of 2-D Numpy Arrays containing the (latitude, longitude) GPS coordinates
+    """
+
+
+    # Convert FOV to radians
+    fov_x = np.radians(fov_x_deg)
+    fov_y = np.radians(fov_y_deg)
+
+    # Calculate the real-world width and height covered by the image (meters)
+    ground_width = 2 * d_height * np.tan(fov_x / 2)
+    ground_height = 2 * d_height * np.tan(fov_y / 2)
+
+    # Calculate meters per pixel
+    meters_per_pixel_x = ground_width / img_width
+    meters_per_pixel_y = ground_height / img_height
+
+    # Pixels displacement from image center
+    dx_pixels = x_pixels - img_width / 2
+    dy_pixels = y_pixels - img_height / 2
+
+    # Displacement in meters
+    dx_meters = dx_pixels * meters_per_pixel_x
+    dy_meters = dy_pixels * meters_per_pixel_y
+
+    # Convert meters to degrees
+    delta_lats = -dy_meters / 111111  # Latitude: negative because y increases downward
+    delta_lons = dx_meters / (111111 * np.cos(np.radians(d_lat)))
+
+    # Final GPS coordinates / Rounded to 6 decimal places -> Precision of 1.11 m
+    new_lats = np.round( (d_lat + delta_lats), 6)
+    new_lons = np.round( (d_lon + delta_lons), 6)
+
+    return new_lats, new_lons

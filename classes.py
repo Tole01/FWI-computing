@@ -20,7 +20,7 @@ class meshCell:
   '''
   # Temperature matrix is shared across al instances
 
-  thermal_matrix = normalize_temperature(get_temp_matrix())
+  # thermal_matrix = normalize_temperature(get_temp_matrix())
 
   def __init__(self, lat, lon, row, col):
     self.pos = (row, col)
@@ -44,7 +44,7 @@ class meshCell:
     self.indices['weather'] = get_weather_data(self.lat, self.lon)
     self.indices['ndvi'] = get_ndvi(self.lat, self.lon)
     self.indices['slope'] = get_slope(self.lat, self.lon)
-    self.indices['thermal'] = get_temperature(meshCell.thermal_matrix, self.pos[1], self.pos[0])
+    # self.indices['thermal'] = get_temperature(meshCell.thermal_matrix, self.pos[1], self.pos[0])
     self.indices['bui'] = calculate_fwi(self.indices['weather'])['BUI']
 
     return self.indices
