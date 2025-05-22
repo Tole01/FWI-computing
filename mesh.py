@@ -6,7 +6,7 @@ from coordinates import pixel_to_gps
 # Camera resolution parameters (substitute for Walksnail Moonlight)
 fov_x_deg, fov_y_deg = 157, 140
 
-def mesh_segmentation(image, thermal_matrix, drone_lat, drone_lon, height_m, x_columns = 16, y_rows = 9):
+def mesh_segmentation(image, drone_lat, drone_lon, height_m, x_columns = 16, y_rows = 9):
     '''Generates a mesh of a specified cell number according to the chosen resolution, and 
      computes the parameters and risk score for each cell.
      
@@ -40,10 +40,10 @@ def mesh_segmentation(image, thermal_matrix, drone_lat, drone_lon, height_m, x_c
                                         height_m, drone_lat, drone_lon, fov_x_deg, fov_y_deg)
             except:
                 print('Error converting pixel to GPS coordinates.')
-                quit()
+                continue 
             print(f'\nCoordinates: {lat}, {lon}')
             # Creates object and calculates parameters/risk score
-            cell = meshCell(lat, lon, row, col, thermal_matrix)
+            cell = meshCell(lat, lon, row, col)
             try:
                 # Computes parameters 
                 cell.compute_indices()
@@ -54,14 +54,35 @@ def mesh_segmentation(image, thermal_matrix, drone_lat, drone_lon, height_m, x_c
                 print(f'Risk score: {cell.risk:.4f}')
             except Exception as e:
                 print(f'There was an error computing the indexes: {e}')
-                quit()
+                continue
        
             # Insterts object into array
             mesh[row][col] = cell.risk
             coord_list.append( (cell.lat, cell.lon, cell.risk) )
-            # Frees up memory
-            del cell
+            
     return mesh, coord_list
+
+
+def mesh_segmentation2(image, d_lat, d_lon, d_height, x_columns = 16, y_rows = 9):
+    '''
+    Generates the mesh analysis from the image taken by the optical camera. 
+
+    Input:
+
+
+    Output:
+
+
+    '''
+    # Display image attributes
+    
+
+    # Generate Mesh with 
+
+    mesh = coordinate_mesh(image, x_columns, y_rows)
+
+
+def coordinate_mesh(image, x_columns, y_rows):
 
 
 

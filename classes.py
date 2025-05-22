@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 import math
 from utils import get_weather_data, get_ndvi, get_slope, calculate_risk_score
-from temperature import get_temperature
+from temperature import get_temperature, get_temp_matrix, normalize_temperature
+
 
 class meshCell:
   '''
@@ -16,17 +17,18 @@ class meshCell:
     bui -> Build-up index
     risk -> Computed risk score for the cell
     classf -> Risk classification assigned from score 
-
   '''
-  def __init__(self, lat, lon, row, col,thermal_matrix):
+  # Temperature matrix is shared across al instances
+
+  thermal_matrix = normalize_temperature(get_temp_matrix())
+
+  def __init__(self, lat, lon, row, col):
     self.pos = (row, col)
     self.lat = lat
     self.lon = lon
     self.indices = {}
     self.risk = None
-    self.clasif = None
-    self.thermal_matrix = thermal_matrix  # Store the thermal matrix
-  
+   
   def __str__(self):
     '''
     String representation for the object. 
@@ -42,7 +44,7 @@ class meshCell:
     self.indices['weather'] = get_weather_data(self.lat, self.lon)
     self.indices['ndvi'] = get_ndvi(self.lat, self.lon)
     self.indices['slope'] = get_slope(self.lat, self.lon)
-    self.indices['thermal'] = get_temperature(self.thermal_matrix, self.pos[1], self.pos[0])
+    self.indices['thermal'] = get_temperature(meshCell.thermal_matrix, self.pos[1], self.pos[0])
     self.indices['bui'] = calculate_fwi(self.indices['weather'])['BUI']
 
     return self.indices
@@ -58,21 +60,7 @@ class meshCell:
                   calculate_risk_score(self.indices['ndvi'], self.indices['slope'], self.indices['thermal'], self.indices['bui']), 5)
             
     return self.risk
-  
-  def compute_clasif(self):
-    '''
-    Classifies cell risk from score and assings a color for visualization. 
-    '''
-    if (self.risk > 0.0) and (self.risk <= 0.4):
-      self.clasif = 'green'
-    elif (self.risk > 0.4) and (self.risk <= 0.7):
-      self.clasif = 'yellow'
-    else: 
-      self.clasif = 'red'
     
-    return self.clasif
-
-  
       
 class FWICLASS:
   def __init__(self, temp, rhum, wind, prcp):

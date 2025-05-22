@@ -76,3 +76,7 @@ def pixel_to_gps(pixel_x, pixel_y, img_width, img_height, height_m, drone_lat, d
 
     # Rounds up to a precision of 5 decimal places (1.11 m)
     return round(new_lat, 6), round(new_lon, 6)
+
+
+def pixel_to_gps_vectorized():
+    pass 
