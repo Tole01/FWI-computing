@@ -50,7 +50,7 @@ def detect_fire(model, fire = 0):
 
                 class_name = results.names[int(cls)]
 
-                if class_name == 'fire' or hotspots: # Si se detecta fuego o hay hotspots
+                if class_name == 'fire' and hotspots: # Si se detecta fuego y hay hotspots
                     fire = 1
                     img_optica = frame.copy()  # Guardamos la imagen original en el momento de detección
                     print(f"🔥 Incendio detectado - Centroide: ({cx}, {cy}) - Confianza: {conf:.2f}")
