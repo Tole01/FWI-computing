@@ -18,9 +18,9 @@ def risk_score(ndvi,slope,thermal):
     return score
 
 def visualizar_riesgo(ndvi,slope,lst_image):
-    ndviWeight = 0.3
+    ndviWeight = 0.6
     slopeWeight = 0.4
-    thermalWeight = 0.5
+    thermalWeight = 0.1
 
     #Cálculo del índice de riesgo como imagen en EE
     riesgo_img = ndvi.multiply(ndviWeight).add(slope.multiply(slopeWeight)).add(lst_image.multiply(thermalWeight)).rename("Riesgo")
