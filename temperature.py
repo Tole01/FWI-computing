@@ -1,19 +1,7 @@
 import serial
 from config import COM_ESP
-
-"""
-temp_matrix = [
-    [135, 100,  40,  60,  80, 135,  30,  30,  60, 125, 130, 130, 130,  90,  60,  25],
-    [130, 115, 140,  65, 135,  75, 110,  30,  25,  65,  25,  25,  25, 130, 130,  70],
-    [130, 125,  35, 130, 130, 130, 115,  30, 135, 135, 105,  25,  25,  35,  35,  25],
-    [ 40,  80, 130,  87,  25, 131,  75, 130, 135,  85,  70,  25,  25,  25,  25,  25],
-    [130,  25, 120, 130, 130, 132, 130, 135, 100,  25, 100, 100, 115,  25,  25,  25],
-    [135, 120, 125,  25,  25, 130,  25, 100,  25,  25,  95, 100, 107,  85,  25,  25],
-    [ 85, 110,  85, 115, 135,  25,  25,  25,  25,  25,  25, 100, 135, 130,  45,  25],
-    [ 25,  25,  25, 115, 130,  25,  25,  25, 100, 120, 120,  90, 135,  90, 135,  30],
-    [ 30,  30,  30,  30,  30,  30,  30,  35,  40,  35,  60,  35,  90, 130,  95,  30]
-]
-"""
+import time
+import numpy as np
 
 def get_temperature(matrix, x, y):
     '''
@@ -32,36 +20,6 @@ def get_temperature(matrix, x, y):
         raise IndexError("Coordenadas fuera de los límites de la matriz.")
     
 
-def get_temp_matrix():
-    """
-    Lee el puerto serial del esp32 y recibe la matriz 16x9 de temperatura de la camara termica
-
-    param: None
-
-    :return: temp_matrix (matriz) 16x9 de temperatura 
-    """
-    ser = serial.Serial(COM_ESP, 115200, timeout=2)
-
-    temp_matrix = []
-    leyendo = False
-    while True:
-        line = ser.readline().decode(errors="ignore").strip()
-        if line == "<START>":
-            leyendo = True
-            temp_matrix = []
-            continue
-        elif line == "<END>":
-            break
-        elif leyendo:
-            try:
-                fila = [int(x) for x in line.split(",")]
-                if len(fila) == 16:
-                    temp_matrix.append(fila)
-            except ValueError:
-                continue  # Ignora líneas corruptas
-
-    return temp_matrix
-
 def normalize_temperature(matrix):
     """
     Normaliza la temperatura de una matriz de temperaturas de -10 a 140
@@ -77,3 +35,50 @@ def normalize_temperature(matrix):
     normalized_matrix = [[(temp - min_temp) / (max_temp - min_temp) for temp in row] for row in matrix]
     
     return normalized_matrix
+
+
+def get_temp_matrix(puerto='COM3', baudios=115200, timeout=10):
+    try:
+        ser = serial.Serial(puerto, baudios, timeout=1)
+    except serial.SerialException as e:
+        print(f"Error al abrir el puerto serial: {e}")
+        return None
+
+    print("Esperando <START>...")
+    start_time = time.time()
+    buffer = ""
+
+    # Esperar hasta encontrar <START>
+    while True:
+        if time.time() - start_time > timeout:
+            print("Tiempo máximo de espera alcanzado.")
+            ser.close()
+            return None
+
+        if ser.in_waiting:
+            chunk = ser.read(ser.in_waiting).decode(errors='ignore')
+            buffer += chunk
+            if "<START>" in buffer:
+                buffer = buffer.split("<START>")[1]
+                break
+
+    print("✅ <START> detectado. Leyendo datos hasta <END>...")
+
+    # Leer hasta <END>
+    while "<END>" not in buffer:
+        if ser.in_waiting:
+            chunk = ser.read(ser.in_waiting).decode(errors='ignore')
+            buffer += chunk
+        else:
+            time.sleep(0.01)
+
+    ser.close()
+    datos_brutos = buffer.split("<END>")[0].strip()
+    filas = datos_brutos.strip().splitlines()
+
+    try:
+        matriz = [list(map(float, fila.strip().split(','))) for fila in filas]
+        return np.array(matriz, dtype=np.float32)
+    except Exception as e:
+        print(f"Error al convertir a matriz: {e}")
+        return None
