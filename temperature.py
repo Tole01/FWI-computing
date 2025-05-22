@@ -5,9 +5,9 @@ import numpy as np
 from scipy.ndimage import label, center_of_mass
 from coordinates import hotspot_en_area
 
-def get_temperature(coordinates, hotspots,hotspot_location,t_amb):
+def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix):
 
-    temp_array = []
+    temp_array = np.empty((coordinates.shape[0], coordinates.shape[1]), dtype=np.float32)
     dx = coordinates[0][1][0] - coordinates[0][0][0] 
     dy = coordinates[1][0][1] - coordinates[0][0][1]
 
@@ -16,7 +16,18 @@ def get_temperature(coordinates, hotspots,hotspot_location,t_amb):
             lat, lon = coordinates[row][col]
             lat2, lon2 = lat + dx, lon + dy
             dentro = hotspot_en_area(hotspot_location,lat,lon,lat2,lon2)
-    
+
+            hotspot_temp = None
+            if dentro:
+                # Si el hotspot está dentro de la celda, asignar la temperatura del hotspot
+                for idx, (lat, lon) in dentro:
+                    cx, cy = hotspots[idx]
+                    hotspot_temp = thermal_matrix[cx][cy]
+                
+                temp_array[row][col] = hotspot_temp
+            else:
+                # Si no está dentro de un hotspot, asignar la temperatura ambiente
+                temp_array[row][col] = t_amb
     
     return temp_array
 

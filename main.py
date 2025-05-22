@@ -38,7 +38,7 @@ for cx, cy in hotspots:
 lat_fire, lon_fire = pixel_to_gps(cx,cy,1920,1080,drone_height,drone_lat,drone_lon, FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL)
 
 # Análisis de Mallado
-rsk, coord_list = mesh_segmentation2(fire_img, drone_lat, drone_lon, drone_height,hotspots,hotspot_location,t_amb)
+rsk, coord_list = mesh_segmentation2(fire_img, drone_lat, drone_lon, drone_height,hotspots,hotspot_location,t_amb, thermal_matrix)
 rsk_image = colorear_celdas(fire_img, rsk,fire_coordinates)
 cv2.imshow("Fire risk output", rsk_image)
 cv2.waitKey(0)

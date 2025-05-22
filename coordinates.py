@@ -137,9 +137,9 @@ def hotspot_en_area(hotspots, lat_sup_izq, lon_sup_izq, lat_inf_der, lon_inf_der
     lon_max = max(lon_sup_izq, lon_inf_der)
 
     encontrados = []
-    for lat, lon in hotspots:
+    for i,(lat, lon) in hotspots:
         if lat_min <= lat <= lat_max and lon_min <= lon <= lon_max:
-            encontrados.append((lat, lon))
+            encontrados.append(i,(lat, lon))
 
     return encontrados  # Lista de hotspots que sí están dentro del área
 

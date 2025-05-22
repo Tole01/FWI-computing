@@ -68,7 +68,7 @@ def mesh_segmentation(image, drone_lat, drone_lon, height_m, hotspots,hotspot_lo
     return mesh, coord_list
 
 
-def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t_amb, x_columns = 16, y_rows = 9):
+def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t_amb, thermal_matrix, x_columns = 16, y_rows = 9):
     '''
     Generates the mesh analysis from the image taken by the optical camera. 
 
@@ -82,7 +82,7 @@ def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t
     # Generate GPS coordinates mesh
     coords = generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height)
     # Compute Indices
-    indices = compute_indices(coords, hotspots,hotspot_location,t_amb)
+    indices = compute_indices(coords, hotspots,hotspot_location,t_amb,thermal_matrix)
     # Computes risk score
     risk = compute_riskscore(indices)
 
@@ -123,7 +123,7 @@ def generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height):
 
     return coords
 
-def compute_indices(coordinates, hotspots,hotspot_location,t_amb):
+def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix):
     '''
     Generates an indices array containing (ndvi, slope, thermal, bui) values.
 
@@ -150,7 +150,7 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb):
     # Call API's on the input arrays
     try:
         print('Starting to compute APIs...')
-        temp = get_thermal_vectorized(coordinates, hotspots,hotspot_location,t_amb)
+        temp = get_thermal_vectorized(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix)
         ndvi = get_ndvi_vectorized(lat, lon)
         slopes = get_slope_vectorized(lat, lon)
         weather = get_weather_data_vectorized(lat, lon)
