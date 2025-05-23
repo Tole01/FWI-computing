@@ -190,7 +190,7 @@ def compute_riskscore(indices):
     THERMAL = indices[:, :, 2]  # All Thermal values / Modify implementation
     BUI = indices[:, :, 3]   # All BUI values
 
-    return NDVI * weights['NDVI'] + SLOPE * weights['SLOPE'] + BUI * weights['BUI']
+    return NDVI * weights['NDVI'] + SLOPE * weights['SLOPE'] + THERMAL * weights['THERMAL']+ BUI * weights['BUI']
      
 
 
