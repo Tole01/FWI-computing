@@ -45,7 +45,7 @@ cv2.destroyAllWindows
 rsk_interpolated = NNI_kernel(rsk)
 # Visualización del Análisis de Riesgo
 try: 
-    rsk_image = colorear_celdas(fire_img, rsk_interpolated)
+    rsk_image = colorear_celdas(fire_img, rsk_interpolated, fire_coordinates)
     cv2.imshow("Fire risk output kernel", rsk_image)
     cv2.waitKey(0)
     cv2.destroyAllWindows

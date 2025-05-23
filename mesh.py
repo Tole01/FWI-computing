@@ -85,7 +85,13 @@ def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t
     # Computes risk score
     risk = compute_riskscore(indices)
 
-    return risk, coords
+    lats = coords[:, :, 0]
+    lons = coords[:, :, 1]
+
+
+    result = np.stack((lats,lons, risk), axis=-1)
+
+    return risk,result
 
 
     # Compute indices / Call API's from coords
@@ -149,11 +155,11 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
     # Call API's on the input arrays
     try:
         print('Starting to compute APIs...')
-        temp = get_thermal_vectorized(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix)
+        temp = get_temperature(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix)
         ndvi = get_ndvi_vectorized(lat, lon)
         slopes = get_slope_vectorized(lat, lon)
         weather = get_weather_data_vectorized(lat, lon)
-        fwi = get_fwi_vectorized = (weather)
+        fwi = get_fwi_vectorized(weather)
         bui = np.vectorize(lambda array: array['BUI'], otypes=[float])(fwi)
 
     except Exception as e:
@@ -183,7 +189,7 @@ def compute_riskscore(indices):
             3rd -> BUI
     ''' 
     assert isinstance(indices, np.ndarray), "Indices must be a Numpy Array"
-    assert indices.shape == (9, 16, 3), "Array doesn't have correct dimensions"
+    assert indices.shape == (9, 16, 4), "Array doesn't have correct dimensions"
      
     NDVI = indices[:, :, 0]  # All NDVI values (9 x 16) shape
     SLOPE = indices[:, :, 1] # All Slope values

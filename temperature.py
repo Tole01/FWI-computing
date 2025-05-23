@@ -48,7 +48,7 @@ def normalize_temperature(matrix):
     return normalized_matrix
 
 
-def get_temp_matrix(puerto=COM_ESP, baudios=115200, timeout=10):
+def get_temp_matrix(puerto=COM_ESP, baudios=115200, timeout=20):
     try:
         ser = serial.Serial(puerto, baudios, timeout=1)
     except serial.SerialException as e:
