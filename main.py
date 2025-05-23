@@ -13,7 +13,7 @@ from config import FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL, FOV_TERMICA_HORIZ
 # Inicialización del proceso de detección incendio a través de cámara óptica y térmica YOLOv8
 model = YOLO(r"fire_s.pt")
 fire_img, cx, cy, fire_coordinates,hotspots,t_amb,thermal_matrix = detect_fire(model) #imagen optica, centroides de incendios
-drone_lat,drone_lon,drone_height = get_coordinates() # Coordenadas del drone
+#drone_lat,drone_lon,drone_height = get_coordinates() # Coordenadas del drone
 
 print(fire_coordinates)
 
@@ -21,7 +21,7 @@ cv2.imshow("Imagen Óptica Capturada", fire_img)
 cv2.waitKey(5000)
 cv2.destroyAllWindows()
 
-#drone_lat,drone_lon,drone_height = 25.64933, -100.28890, 30 # para el ejemplo
+drone_lat,drone_lon,drone_height = 25.64933, -100.28890, 30 # para el ejemplo
 
 hotspot_location = []
 for cx, cy in hotspots:
@@ -33,6 +33,7 @@ img_height, img_width = fire_img.shape[:2]
 
 # Coordenadas del incendio -> Input para EQUIPO 2
 lat_fire, lon_fire = pixel_to_gps(cx,cy,img_height,img_width,drone_height,drone_lat,drone_lon, FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL)
+print(f"incendio: Latitud: {lat_fire}, Longitud: {lon_fire}")
 
 # Análisis de Mallado
 rsk, coord_list = mesh_segmentation2(fire_img, drone_lat, drone_lon, drone_height,hotspots,hotspot_location,t_amb, thermal_matrix)

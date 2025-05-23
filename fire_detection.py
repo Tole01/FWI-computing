@@ -18,7 +18,7 @@ def detect_fire(model, fire = 0):
         fire_coordinates: Lista de tuplas que contienen la coordenada (cx, cy) del centro del fuego
     """
     model = YOLO(r"fire_s.pt") #Modelo de deteccion entrenado
-    cap = cv2.VideoCapture(1)  # Ajustar a cámara correspondiente
+    cap = cv2.VideoCapture(0)  # Ajustar a cámara correspondiente
     if not cap.isOpened():
         print("No se pudo abrir la cámara.")
         exit()
@@ -37,6 +37,7 @@ def detect_fire(model, fire = 0):
 
         # Ejecutar inferencia cada 3 frames
         if frame_count % 3 == 0:
+            frame = cv2.imread(r'firetest11.jpg') #ejemplo se borra
             resized_frame = cv2.resize(frame, (640, 360))
             results = model(resized_frame, conf=0.3)[0] #resultados de YOLO en el frame
             #results = model.predict(source=r"firetest11.jpg", conf=0.4)[0] #ejemplo se borra

@@ -10,4 +10,4 @@ THERMAL_HEIGHT = 120
 
 # Puertos de conexión
 COM_ANTENA = 'COM3' # puerto donde se conecta la antena del dron
-COM_ESP = 'COM4' # puerto donde se conecta el ESP32
+COM_ESP = 'COM7' # puerto donde se conecta el ESP32
