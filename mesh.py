@@ -199,12 +199,6 @@ def compute_riskscore(indices):
     return NDVI * weights['NDVI'] + SLOPE * weights['SLOPE'] + THERMAL * weights['THERMAL']+ BUI * weights['BUI']
      
 
-
-
-
-
-
-
 def vectorize_function(functions):
     '''
     Vectorizes a given function as input. 

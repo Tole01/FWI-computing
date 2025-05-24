@@ -31,23 +31,6 @@ def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix)
     
     return temp_array
 
-def normalize_temperature(matrix):
-    """
-    Normaliza la temperatura de una matriz de temperaturas de -10 a 140
-
-    :param matrix: Lista de listas que representa la matriz de temperaturas.
-    :return: Matriz de temperaturas normalizada.
-    """
-    # Encuentra el valor mínimo y máximo en la matriz
-    min_temp = -10  # Valor mínimo de temperatura de la camara
-    max_temp = 140   # Valor máximo de temperatura de la camara
-
-    # Normaliza la matriz
-    normalized_matrix = [[(temp - min_temp) / (max_temp - min_temp) for temp in row] for row in matrix]
-    
-    return normalized_matrix
-
-
 def get_temp_matrix(puerto=COM_ESP, baudios=115200, timeout=20):
     try:
         ser = serial.Serial(puerto, baudios, timeout=1)
@@ -95,13 +78,12 @@ def get_temp_matrix(puerto=COM_ESP, baudios=115200, timeout=20):
         return None
 
 
-def detectar_hotspots(matriz_temp, tamano_minimo=3):
+def detectar_hotspots(matriz_temp, tamano_minimo=5):
     """
     Detecta hotspots en una matriz de temperaturas.
 
     Parámetros:
     - matriz_temp: np.ndarray de forma (60, 80), con temperaturas en °C.
-    - margen: diferencia mínima en °C respecto a la temperatura ambiente para considerar un hotspot.
     - tamano_minimo: tamaño mínimo (en píxeles) para que un cluster sea considerado un hotspot.
 
     Retorna:
@@ -111,7 +93,7 @@ def detectar_hotspots(matriz_temp, tamano_minimo=3):
     # Calcular la temperatura ambiente como la mediana de la matriz
     temp_ambiente = np.median(matriz_temp)
 
-    margen = .25* temp_ambiente
+    margen = .8* temp_ambiente
 
     # Crear una máscara binaria donde las temperaturas superan el umbral
     mascara = matriz_temp > (temp_ambiente + margen)

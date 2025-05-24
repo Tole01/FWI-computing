@@ -34,13 +34,13 @@ def detect_fire(model, fire = 0):
         
         thermal_matrix = get_temp_matrix() # Obtener temperatura 120X160
         hotspots, t_amb = detectar_hotspots(thermal_matrix)
+        cx,cy = hotspots[-1] if hotspots else (None, None)  # Coordenadas del último hotspot detectado
 
         # Ejecutar inferencia cada 3 frames
         if frame_count % 3 == 0:
             frame = cv2.imread(r'firetest11.jpg') #ejemplo se borra
             resized_frame = cv2.resize(frame, (640, 360))
             results = model(resized_frame, conf=0.3)[0] #resultados de YOLO en el frame
-            #results = model.predict(source=r"firetest11.jpg", conf=0.4)[0] #ejemplo se borra
             annotated_frame = results.plot()
             fire_coordinates = []  # Lista para almacenar los pares (cx, cy)
             for box, cls, conf in zip(results.boxes.xyxy, results.boxes.cls, results.boxes.conf):
@@ -51,7 +51,7 @@ def detect_fire(model, fire = 0):
 
                 class_name = results.names[int(cls)]
 
-                if class_name == 'fire' and hotspots: # Si se detecta fuego y hay hotspots
+                if class_name == 'fire' and hotspots: # Se puede cambiar por "or"
                     fire = 1
                     img_optica = frame.copy()  # Guardamos la imagen original en el momento de detección
                     print(f"🔥 Incendio detectado - Centroide: ({cx}, {cy}) - Confianza: {conf:.2f}")
