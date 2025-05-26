@@ -1,13 +1,12 @@
 from fire_detection import detect_fire
 from mesh import mesh_segmentation2
-from display import NNI_kernel, colorear_celdas
+from display import NNI_kernel, colorear_celdas, crop_optical_to_thermal
 import cv2
 from ultralytics import YOLO
 from coordinates import pixel_to_gps
 from geojson_gen import generar_geojson
 from flask import Flask, render_template, send_from_directory
 from coordinates import get_coordinates
-from utils import normalizar
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -17,12 +16,15 @@ from config import FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL, FOV_TERMICA_HORIZ
 model = YOLO(r"fire_s.pt")
 fire_img, cx, cy, fire_coordinates,hotspots,t_amb,thermal_matrix = detect_fire(model) #imagen optica, centroides de incendios
 #drone_lat,drone_lon,drone_height = get_coordinates() # Coordenadas del drone
+drone_lat,drone_lon,drone_height = 34.19135792863, -118.13209036525, 50 # para el ejemplo
+
+img_height, img_width = fire_img.shape[:2]
+print(f"Imagen óptica capturada: {img_height}x{img_width} píxeles")
+
 
 cv2.imshow("Imagen Óptica Capturada", fire_img)
 cv2.waitKey(5000)
 cv2.destroyAllWindows() 
-
-drone_lat,drone_lon,drone_height = 34.19135792863, -118.13209036525, 50 # para el ejemplo
 
 print('_______________________hotspots location_____________________________')
 hotspot_location = []
@@ -32,8 +34,6 @@ for cy, cx in hotspots:
     print(f"Hotspot: Latitud: {lat}, Longitud: {lon}")
 hotspot_location = np.array(hotspot_location)
 
-img_height, img_width = fire_img.shape[:2]
-
 # Coordenadas del incendio -> Input para EQUIPO 2
 print('__________________Coordenadas EQUIPO 2_____________________________')
 lat_fire, lon_fire = pixel_to_gps(cx,cy,img_height,img_width,drone_height,drone_lat,drone_lon, FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL)
@@ -42,8 +42,6 @@ print(f"🔥🔥Incendio: Latitud: {lat_fire}, Longitud: {lon_fire}")
 # Análisis de Mallado
 rsk, coord_list = mesh_segmentation2(fire_img, drone_lat, drone_lon, drone_height,hotspots,hotspot_location,t_amb, thermal_matrix)
 rsk_image = colorear_celdas(fire_img, rsk,fire_coordinates)
-
-print(f"Riesgo: {rsk}")
 
 cv2.imshow("Fire risk output", rsk_image)
 cv2.waitKey(5000)

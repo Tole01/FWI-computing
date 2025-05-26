@@ -4,6 +4,7 @@ from coordinates import pixel_to_gps, pixel_to_gps_vectorized
 from utils import get_weather_data, get_ndvi, get_slope
 from classes import calculate_fwi
 from temperature import get_temperature
+from utils import normalizar
 
 weights = {}
 
@@ -80,10 +81,6 @@ def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t
     '''
     # Generate GPS coordinates mesh
     coords = generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height)
-    np.set_printoptions(precision=8, suppress=False)
-    print('___________________________coords__________________________')
-    print(f'Coordinates mesh: {coords}')
-    print('___________________________________________________________')
     # Compute Indices
     indices = compute_indices(coords, hotspots,hotspot_location,t_amb,thermal_matrix)
     # Computes risk score
@@ -114,8 +111,7 @@ def generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height):
             where each element is a 1-D Numpy array containing (lat, lon) pairs.
     '''
     # Display image attributes
-    img_height, img_width, channels = image.shape
-    #print(f'Image Resolution: ({img_height} x {img_width}) pixels')
+    img_height, img_width = image.shape[:2]
 
     x_res, y_res = (img_width / x_columns), (img_height / y_rows)
 
@@ -158,22 +154,22 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
     # Call API's on the input arrays
     try:
         print('__________________________API CALLS________________________________')
-        print('Starting to compute APIs...')
+        print('LLamando APIs')
         temp = get_temperature(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix)
-        print(f'{temp}')
-        print('____________________________________________________________________')
+        print(f'Temperatura terminada')
+
         ndvi = get_ndvi_vectorized(lat, lon)
-        print(f'{ndvi}')
-        print('____________________________________________________________________')
+        ndvi_norm = normalizar(ndvi)
+        print(f'NDVI terminado')
+
         slopes = get_slope_vectorized(lat, lon)
-        print(f'{slopes}')
-        print('____________________________________________________________________')
+        slopes_norm = normalizar(slopes)
+        print(f'Pendiente terminado')
+
         weather = get_weather_data_vectorized(lat, lon)
-        print('Weather API finished')
         fwi = get_fwi_vectorized(weather)
-        print('FWI API finished')
         bui = np.vectorize(lambda array: array['BUI'], otypes=[float])(fwi)
-        print(f'{bui}')
+        print(f'BUI terminado')
         print('____________________________________________________________________')
 
     except Exception as e:
@@ -182,11 +178,11 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
 
 
     # Combine parameters into a single array
-    indices = np.stack((ndvi, slopes, temp, bui), axis=-1)
+    indices = np.stack((ndvi_norm, slopes_norm, temp, bui), axis=-1)
 
     return indices 
 
-weights = {'NDVI': 0.3, 'SLOPE': 0.03, 'THERMAL': 0.45, 'BUI': 0.22}
+weights = {'NDVI': 0.12, 'SLOPE': 0.29, 'THERMAL': 0.45, 'BUI': 0.14}
 
 def compute_riskscore(indices):
     '''

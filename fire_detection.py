@@ -41,7 +41,7 @@ def detect_fire(model, fire = 0):
         if frame_count % 3 == 0:
             frame = cv2.imread(r'firetest11.jpg') #ejemplo se borra
             resized_frame = cv2.resize(frame, (640, 360))
-            results = model(resized_frame, conf=0.3)[0] #resultados de YOLO en el frame
+            results = model(resized_frame, conf=0.4)[0] #resultados de YOLO en el frame
             annotated_frame = results.plot()
             fire_coordinates = []  # Lista para almacenar los pares (cx, cy)
             for box, cls, conf in zip(results.boxes.xyxy, results.boxes.cls, results.boxes.conf):
@@ -66,7 +66,7 @@ def detect_fire(model, fire = 0):
             cv2.imshow("Detección de Incendio - Webcam", annotated_frame)
 
             # Permitir salir manualmente presionando 'q'
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cv2.waitKey(3000) & 0xFF == ord('q'):
                 print("Saliendo manualmente...")
                 break
 

@@ -7,11 +7,13 @@ from coordinates import hotspot_en_area
 
 np.random.seed(42)
 temp_array = np.random.uniform(20,25, size=(120, 160))
-temp_array[0:7, 0:7] = 127
-temp_array[0:7, 80:85] = 100
-temp_array[0:7, 153:160] = 80
-temp_array[50:55, 0:7] = 80
-temp_array[50:55, 80:85] = 85
+temp_array[0:10, 0:10] = 135
+temp_array[50:60, 0:10] = 95
+temp_array[100:110, 0:10] = 83
+
+temp_array[0:10, 50:60] = 129
+temp_array[50:60, 50:60] = 92
+
 temp_matrix = temp_array
 
 def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix):
@@ -30,8 +32,7 @@ def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix)
             dif_lat = dlat if dif_lat is None else min(dif_lat, dlat)
         if dlon != 0:
             dif_lon = dlon if dif_lon is None else min(dif_lon, dlon)
-            
-    print(f"Displacement lat: {dif_lat}, lon: {dif_lon}")
+
     for col in range(coordinates.shape[1]):
         for row in range(coordinates.shape[0]):
             lat, lon = coordinates[row][col]
