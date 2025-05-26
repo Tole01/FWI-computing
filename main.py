@@ -7,7 +7,9 @@ from coordinates import pixel_to_gps
 from geojson_gen import generar_geojson
 from flask import Flask, render_template, send_from_directory
 from coordinates import get_coordinates
+from utils import normalizar
 import matplotlib.pyplot as plt
+import numpy as np
 from config import FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL, FOV_TERMICA_HORIZONTAL, FOV_TERMICA_VERTICAL ,THERMAL_WIDTH, THERMAL_HEIGHT
 
 # Inicialización del proceso de detección incendio a través de cámara óptica y térmica YOLOv8
@@ -15,19 +17,27 @@ model = YOLO(r"fire_s.pt")
 fire_img, cx, cy, fire_coordinates,hotspots,t_amb,thermal_matrix = detect_fire(model) #imagen optica, centroides de incendios
 #drone_lat,drone_lon,drone_height = get_coordinates() # Coordenadas del drone
 
+print("_____________________fire coordinates__________________________")
 print(fire_coordinates)
+print("_______________________________________________________________")
 
 cv2.imshow("Imagen Óptica Capturada", fire_img)
 cv2.waitKey(5000)
-cv2.destroyAllWindows()
+cv2.destroyAllWindows() 
 
-drone_lat,drone_lon,drone_height = 25.64933, -100.28890, 30 # para el ejemplo
+drone_lat,drone_lon,drone_height = 34.19235697078204, -118.13327334741147, 30 # para el ejemplo
 
+print('____________________hotspots location__________________________')
 hotspot_location = []
 for cx, cy in hotspots:
     lat,lon = pixel_to_gps(cx,cy,THERMAL_WIDTH,THERMAL_HEIGHT,drone_height,drone_lat,drone_lon,FOV_TERMICA_HORIZONTAL, FOV_TERMICA_VERTICAL)
     hotspot_location.append((lat,lon))
     print(f"Hotspot: Latitud: {lat}, Longitud: {lon}")
+hotspot_location = np.array(hotspot_location)
+print(f'hotspots location size: {hotspot_location.shape}')
+print(f'hotspots size: {hotspots.shape}')
+print(f'thermal matrix size: {thermal_matrix.shape}')
+print('_______________________________________________________________')
 
 img_height, img_width = fire_img.shape[:2]
 
@@ -37,12 +47,16 @@ print(f"incendio: Latitud: {lat_fire}, Longitud: {lon_fire}")
 
 # Análisis de Mallado
 rsk, coord_list = mesh_segmentation2(fire_img, drone_lat, drone_lon, drone_height,hotspots,hotspot_location,t_amb, thermal_matrix)
-rsk_image = colorear_celdas(fire_img, rsk,fire_coordinates)
+rsk_norm = normalizar(rsk)
+rsk_image = colorear_celdas(fire_img, rsk_norm,fire_coordinates)
+
+print(f"Riesgo: {rsk_norm}")
+
 cv2.imshow("Fire risk output", rsk_image)
-cv2.waitKey(0)
+cv2.waitKey(5000)
 cv2.destroyAllWindows
 # Nearest neighbor interpolation
-rsk_interpolated = NNI_kernel(rsk)
+rsk_interpolated = NNI_kernel(rsk_norm)
 # Visualización del Análisis de Riesgo
 try: 
     rsk_image = colorear_celdas(fire_img, rsk_interpolated, fire_coordinates)

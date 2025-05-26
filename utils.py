@@ -217,3 +217,23 @@ def calculate_risk_score(ndvi, slope, thermal, bui):
     risk_score = sum( [weights[param.upper()] * values[param] for param in values.keys()] )
     
     return risk_score
+
+def normalizar(arr):
+    """
+    Normaliza un array 1D entre 0 y 1.
+    
+    Args:
+        arr (numpy.ndarray): Array 1D a normalizar.
+    
+    Returns:
+        numpy.ndarray: Array normalizado.
+    """
+    min_val = np.min(arr)
+    max_val = np.max(arr)
+    
+    if max_val - min_val == 0:
+        return np.zeros_like(arr)  # Evitar división por cero
+    
+    normalized_arr = (arr - min_val) / (max_val - min_val)
+    
+    return normalized_arr

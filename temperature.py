@@ -5,17 +5,48 @@ import numpy as np
 from scipy.ndimage import label, center_of_mass
 from coordinates import hotspot_en_area
 
+np.random.seed(42)
+temp_array = np.random.uniform(20,25, size=(60, 80))
+temp_array[30:38, 30:40] += 35
+temp_array[30:40, 0:20] += 10
+temp_array[13:18, 28:33] = 80
+temp_array[12:15, 47:52] = 77
+temp_array[38:43, 58:63] = 77
+temp_array[8:13, 8:13] = 65
+temp_array[0:5, 0:5] = 90
+temp_array[50:55, 50:55] = 70
+temp_array[40:45,20:24] = 83
+temp_matrix = temp_array
+
 def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix):
 
     temp_array = np.empty((coordinates.shape[0], coordinates.shape[1]), dtype=np.float32)
-    dx = coordinates[0][1][0] - coordinates[0][0][0] 
-    dy = coordinates[1][0][1] - coordinates[0][0][1]
+    dif_lat = None
+    dif_lon = None
+
+    for i in range(1, len(coordinates)):
+        lat1, lon1 = coordinates[i - 1][i-1]  
+        lat2, lon2 = coordinates[i][i]
+        dlat = abs(lat2 - lat1)
+        dlon = abs(lon2 - lon1)
+
+        if dlat != 0:
+            dif_lat = dlat if dif_lat is None else min(dif_lat, dlat)
+        if dlon != 0:
+            dif_lon = dlon if dif_lon is None else min(dif_lon, dlon)
+
+    print('__________________________________________')
+    print(f'dif_lat: {dif_lat}, dif_lon: {dif_lon}')
+    print('__________________________________________')
 
     for col in range(coordinates.shape[1]):
         for row in range(coordinates.shape[0]):
+            print(f'Processing cell at row {row}, col {col}')
             lat, lon = coordinates[row][col]
-            lat2, lon2 = lat + dx, lon + dy
+            lat2, lon2 = lat + dif_lat, lon + dif_lon
+            print(f'Cell coordinates: ({lat}, {lon}) to ({lat2}, {lon2})')
             dentro = hotspot_en_area(hotspot_location,lat,lon,lat2,lon2)
+            print(f'hotspot en area: {dentro}')
 
             hotspot_temp = None
             if dentro:
@@ -111,5 +142,5 @@ def detectar_hotspots(matriz_temp, tamano_minimo=5):
         if np.sum(etiquetas == (i + 1)) >= tamano_minimo:
             fila, columna = centro
             hotspots.append((int(round(fila)), int(round(columna))))
-
+    hotspots = np.array(hotspots)
     return hotspots, temp_ambiente

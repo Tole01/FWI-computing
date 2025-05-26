@@ -1,6 +1,7 @@
 import cv2
 from ultralytics import YOLO
 from temperature import get_temp_matrix, detectar_hotspots
+from temperature import temp_matrix
 
 def detect_fire(model, fire = 0):
     """
@@ -32,9 +33,9 @@ def detect_fire(model, fire = 0):
             print("No se pudo leer el frame de la cámara.")
             break
         
-        thermal_matrix = get_temp_matrix() # Obtener temperatura 120X160
+        thermal_matrix = temp_matrix #get_temp_matrix() # Obtener temperatura 120X160
         hotspots, t_amb = detectar_hotspots(thermal_matrix)
-        cx,cy = hotspots[-1] if hotspots else (None, None)  # Coordenadas del último hotspot detectado
+        cx, cy = hotspots[-1] if hotspots.size > 0 else (None, None) # Coordenadas del último hotspot detectado
 
         # Ejecutar inferencia cada 3 frames
         if frame_count % 3 == 0:
@@ -51,7 +52,7 @@ def detect_fire(model, fire = 0):
 
                 class_name = results.names[int(cls)]
 
-                if class_name == 'fire' and hotspots: # Se puede cambiar por "or"
+                if class_name == 'fire' and hotspots.size > 0: # Se puede cambiar por "or"
                     fire = 1
                     img_optica = frame.copy()  # Guardamos la imagen original en el momento de detección
                     print(f"🔥 Incendio detectado - Centroide: ({cx}, {cy}) - Confianza: {conf:.2f}")

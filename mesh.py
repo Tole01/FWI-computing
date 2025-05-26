@@ -80,6 +80,11 @@ def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t
     '''
     # Generate GPS coordinates mesh
     coords = generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height)
+    np.set_printoptions(precision=8, suppress=False)
+    print('___________________________coords__________________________')
+    #print(f'Coordinates mesh: {coords}')
+    print(f'Coordinates shape: {coords.shape}')
+    print('___________________________________________________________')
     # Compute Indices
     indices = compute_indices(coords, hotspots,hotspot_location,t_amb,thermal_matrix)
     # Computes risk score
@@ -151,16 +156,21 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
     get_weather_data_vectorized = np.vectorize(get_weather_data)
     get_fwi_vectorized = np.vectorize(calculate_fwi)
 
-
     # Call API's on the input arrays
     try:
         print('Starting to compute APIs...')
         temp = get_temperature(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix)
+        print(f'{temp}')
         ndvi = get_ndvi_vectorized(lat, lon)
+        print(f'{ndvi}')
         slopes = get_slope_vectorized(lat, lon)
+        print(f'{slopes}')
         weather = get_weather_data_vectorized(lat, lon)
+        print('Weather API finished')
         fwi = get_fwi_vectorized(weather)
+        print('FWI API finished')
         bui = np.vectorize(lambda array: array['BUI'], otypes=[float])(fwi)
+        print(f'{bui}')
 
     except Exception as e:
         print(f'There was an error calling the APIs: {e}')
@@ -172,7 +182,7 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
 
     return indices 
 
-weights = {'NDVI': 0.23, 'SLOPE': 0.03, 'THERMAL': 0.48, 'BUI': 0.26}
+weights = {'NDVI': 0.3, 'SLOPE': 0.03, 'THERMAL': 0.45, 'BUI': 0.22}
 
 def compute_riskscore(indices):
     '''

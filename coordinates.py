@@ -76,7 +76,7 @@ def pixel_to_gps(pixel_x, pixel_y, img_width, img_height, height_m, drone_lat, d
     new_lon = drone_lon + delta_lon
 
     # Rounds up to a precision of 5 decimal places (1.11 m)
-    return round(new_lat, 6), round(new_lon, 6)
+    return new_lat, new_lon
 
 
 def pixel_to_gps_vectorized(y_pixels, x_pixels, img_width, img_height, d_height, d_lat, d_lon, fov_x_deg = 157, fov_y_deg = 140):
@@ -122,8 +122,8 @@ def pixel_to_gps_vectorized(y_pixels, x_pixels, img_width, img_height, d_height,
     delta_lons = dx_meters / (111111 * np.cos(np.radians(d_lat)))
 
     # Final GPS coordinates / Rounded to 6 decimal places -> Precision of 1.11 m
-    new_lats = np.round( (d_lat + delta_lats), 6)
-    new_lons = np.round( (d_lon + delta_lons), 6)
+    new_lats = (d_lat + delta_lats)
+    new_lons = (d_lon + delta_lons)
 
     return new_lats, new_lons
 
@@ -139,7 +139,7 @@ def hotspot_en_area(hotspots, lat_sup_izq, lon_sup_izq, lat_inf_der, lon_inf_der
     encontrados = []
     for i,(lat, lon) in enumerate (hotspots):
         if lat_min <= lat <= lat_max and lon_min <= lon <= lon_max:
-            encontrados.append(i,(lat, lon))
+            encontrados.append((i,(lat, lon)))
 
     return encontrados  # Lista de hotspots que sí están dentro del área
 
