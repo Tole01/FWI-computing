@@ -10,6 +10,7 @@ from coordinates import get_coordinates
 from utils import normalizar
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 from config import FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL, FOV_TERMICA_HORIZONTAL, FOV_TERMICA_VERTICAL ,THERMAL_WIDTH, THERMAL_HEIGHT
 
 # Inicialización del proceso de detección incendio a través de cámara óptica y térmica YOLOv8
@@ -86,7 +87,13 @@ def mapbox3d():
 
 @app.route("/riesgo.geojson")
 def geojson():
+    print("🛰️ Sirviendo:", os.path.abspath("riesgo.geojson"))
     return send_from_directory(".", "riesgo.geojson")
+
+#@app.route("/riesgo.geojson")
+#def geojson():
+#    print("🛰️ Sirviendo:", os.path.abspath("riesgo.geojson"))
+#    return send_file("riesgo.geojson", cache_timeout=0)
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
