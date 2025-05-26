@@ -82,8 +82,7 @@ def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t
     coords = generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height)
     np.set_printoptions(precision=8, suppress=False)
     print('___________________________coords__________________________')
-    #print(f'Coordinates mesh: {coords}')
-    print(f'Coordinates shape: {coords.shape}')
+    print(f'Coordinates mesh: {coords}')
     print('___________________________________________________________')
     # Compute Indices
     indices = compute_indices(coords, hotspots,hotspot_location,t_amb,thermal_matrix)
@@ -116,7 +115,7 @@ def generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height):
     '''
     # Display image attributes
     img_height, img_width, channels = image.shape
-    print(f'Image Resolution: ({img_height} x {img_width}) pixels')
+    #print(f'Image Resolution: ({img_height} x {img_width}) pixels')
 
     x_res, y_res = (img_width / x_columns), (img_height / y_rows)
 
@@ -158,19 +157,24 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
 
     # Call API's on the input arrays
     try:
+        print('__________________________API CALLS________________________________')
         print('Starting to compute APIs...')
         temp = get_temperature(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix)
         print(f'{temp}')
+        print('____________________________________________________________________')
         ndvi = get_ndvi_vectorized(lat, lon)
         print(f'{ndvi}')
+        print('____________________________________________________________________')
         slopes = get_slope_vectorized(lat, lon)
         print(f'{slopes}')
+        print('____________________________________________________________________')
         weather = get_weather_data_vectorized(lat, lon)
         print('Weather API finished')
         fwi = get_fwi_vectorized(weather)
         print('FWI API finished')
         bui = np.vectorize(lambda array: array['BUI'], otypes=[float])(fwi)
         print(f'{bui}')
+        print('____________________________________________________________________')
 
     except Exception as e:
         print(f'There was an error calling the APIs: {e}')

@@ -17,46 +17,38 @@ model = YOLO(r"fire_s.pt")
 fire_img, cx, cy, fire_coordinates,hotspots,t_amb,thermal_matrix = detect_fire(model) #imagen optica, centroides de incendios
 #drone_lat,drone_lon,drone_height = get_coordinates() # Coordenadas del drone
 
-print("_____________________fire coordinates__________________________")
-print(fire_coordinates)
-print("_______________________________________________________________")
-
 cv2.imshow("Imagen Óptica Capturada", fire_img)
 cv2.waitKey(5000)
 cv2.destroyAllWindows() 
 
-drone_lat,drone_lon,drone_height = 34.19235697078204, -118.13327334741147, 30 # para el ejemplo
+drone_lat,drone_lon,drone_height = 34.19135792863, -118.13209036525, 50 # para el ejemplo
 
-print('____________________hotspots location__________________________')
+print('_______________________hotspots location_____________________________')
 hotspot_location = []
-for cx, cy in hotspots:
+for cy, cx in hotspots:
     lat,lon = pixel_to_gps(cx,cy,THERMAL_WIDTH,THERMAL_HEIGHT,drone_height,drone_lat,drone_lon,FOV_TERMICA_HORIZONTAL, FOV_TERMICA_VERTICAL)
     hotspot_location.append((lat,lon))
     print(f"Hotspot: Latitud: {lat}, Longitud: {lon}")
 hotspot_location = np.array(hotspot_location)
-print(f'hotspots location size: {hotspot_location.shape}')
-print(f'hotspots size: {hotspots.shape}')
-print(f'thermal matrix size: {thermal_matrix.shape}')
-print('_______________________________________________________________')
 
 img_height, img_width = fire_img.shape[:2]
 
 # Coordenadas del incendio -> Input para EQUIPO 2
+print('__________________Coordenadas EQUIPO 2_____________________________')
 lat_fire, lon_fire = pixel_to_gps(cx,cy,img_height,img_width,drone_height,drone_lat,drone_lon, FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL)
-print(f"incendio: Latitud: {lat_fire}, Longitud: {lon_fire}")
+print(f"🔥🔥Incendio: Latitud: {lat_fire}, Longitud: {lon_fire}")
 
 # Análisis de Mallado
 rsk, coord_list = mesh_segmentation2(fire_img, drone_lat, drone_lon, drone_height,hotspots,hotspot_location,t_amb, thermal_matrix)
-rsk_norm = normalizar(rsk)
-rsk_image = colorear_celdas(fire_img, rsk_norm,fire_coordinates)
+rsk_image = colorear_celdas(fire_img, rsk,fire_coordinates)
 
-print(f"Riesgo: {rsk_norm}")
+print(f"Riesgo: {rsk}")
 
 cv2.imshow("Fire risk output", rsk_image)
 cv2.waitKey(5000)
 cv2.destroyAllWindows
 # Nearest neighbor interpolation
-rsk_interpolated = NNI_kernel(rsk_norm)
+rsk_interpolated = NNI_kernel(rsk)
 # Visualización del Análisis de Riesgo
 try: 
     rsk_image = colorear_celdas(fire_img, rsk_interpolated, fire_coordinates)
