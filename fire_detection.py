@@ -41,7 +41,7 @@ def detect_fire(model, fire = 0):
         if frame_count % 3 == 0:
             frame = cv2.imread(r'firetest11.jpg') #ejemplo se borra
             resized_frame = cv2.resize(frame, (640, 360))
-            results = model(resized_frame, conf=0.4)[0] #resultados de YOLO en el frame
+            results = model(resized_frame, conf=0.45)[0] #resultados de YOLO en el frame
             annotated_frame = results.plot()
             fire_coordinates = []  # Lista para almacenar los pares (cx, cy)
             for box, cls, conf in zip(results.boxes.xyxy, results.boxes.cls, results.boxes.conf):

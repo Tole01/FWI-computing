@@ -68,7 +68,7 @@ def mesh_segmentation(image, drone_lat, drone_lon, height_m, hotspots,hotspot_lo
     return mesh, coord_list
 
 
-def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t_amb, thermal_matrix, x_columns = 16, y_rows = 9):
+def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t_amb, thermal_matrix, fire_location, x_columns = 16, y_rows = 9):
     '''
     Generates the mesh analysis from the image taken by the optical camera. 
 
@@ -82,7 +82,7 @@ def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t
     # Generate GPS coordinates mesh
     coords = generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height)
     # Compute Indices
-    indices = compute_indices(coords, hotspots,hotspot_location,t_amb,thermal_matrix)
+    indices, fire_cells = compute_indices(coords, hotspots,hotspot_location,t_amb,thermal_matrix,fire_location)
     # Computes risk score
     risk = compute_riskscore(indices)
 
@@ -92,7 +92,7 @@ def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t
 
     result = np.stack((lats,lons, risk), axis=-1)
 
-    return risk,result
+    return risk,result, fire_cells
 
 
     # Compute indices / Call API's from coords
@@ -129,7 +129,7 @@ def generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height):
 
     return coords
 
-def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix):
+def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix, fire_location):
     '''
     Generates an indices array containing (ndvi, slope, thermal, bui) values.
 
@@ -156,7 +156,7 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
     try:
         print('__________________________API CALLS________________________________')
         print('LLamando APIs')
-        temp = get_temperature(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix)
+        temp, fire_cells = get_temperature(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix, fire_location)
         print(f'Temperatura terminada')
         print(temp)
 
@@ -185,9 +185,9 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
     # Combine parameters into a single array
     indices = np.stack((ndvi_norm, slopes_norm, temp, bui), axis=-1)
 
-    return indices 
+    return indices, fire_cells
 
-weights = {'NDVI': 0.12, 'SLOPE': 0.29, 'THERMAL': 0.45, 'BUI': 0.14}
+weights = {'NDVI': 0.17, 'SLOPE': 0.2, 'THERMAL': 0.49, 'BUI': 0.14}
 
 def compute_riskscore(indices):
     '''
