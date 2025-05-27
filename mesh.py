@@ -155,7 +155,6 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
     # Call API's on the input arrays
     try:
         print('__________________________API CALLS________________________________')
-        print('LLamando APIs')
         temp, fire_cells = get_temperature(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix, fire_location)
         print(f'Temperatura terminada')
 
