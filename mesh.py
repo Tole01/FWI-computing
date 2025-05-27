@@ -158,23 +158,19 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
         print('LLamando APIs')
         temp, fire_cells = get_temperature(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix, fire_location)
         print(f'Temperatura terminada')
-        print(temp)
 
         ndvi = get_ndvi_vectorized(lat, lon)
         ndvi_norm = normalizar(ndvi)
         print(f'NDVI terminado')
-        print(ndvi_norm)
 
         slopes = get_slope_vectorized(lat, lon)
         slopes_norm = normalizar(slopes)
         print(f'Pendiente terminado')
-        print(slopes_norm)
 
         weather = get_weather_data_vectorized(lat, lon)
         fwi = get_fwi_vectorized(weather)
         bui = np.vectorize(lambda array: array['BUI'], otypes=[float])(fwi)
         print(f'BUI terminado')
-        print(bui)
         print('____________________________________________________________________')
 
     except Exception as e:
@@ -187,7 +183,7 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
 
     return indices, fire_cells
 
-weights = {'NDVI': 0.17, 'SLOPE': 0.2, 'THERMAL': 0.49, 'BUI': 0.14}
+weights = {'NDVI': 0.19, 'SLOPE': 0.15, 'THERMAL': 0.49, 'BUI': 0.17}
 
 def compute_riskscore(indices):
     '''

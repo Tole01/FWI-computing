@@ -57,20 +57,20 @@ for cy, cx in fire_cells:
         coord_list[cy, cx, 2] = 1
     # Arriba
     if 0 <= cy+1 < height and 0 <= cx < width:
-        rsk[cy+1, cx] = 0.5
-        coord_list[cy+1, cx, 2] = 0.5
+        rsk[cy+1, cx] = 0.65
+        coord_list[cy+1, cx, 2] = 0.65
     # Derecha
     if 0 <= cy < height and 0 <= cx+1 < width:
-        rsk[cy, cx+1] = 0.5
-        coord_list[cy, cx+1, 2] = 0.5
+        rsk[cy, cx+1] = 0.65
+        coord_list[cy, cx+1, 2] = 0.65
     # Abajo
     if 0 <= cy-1 < height and 0 <= cx < width:
-        rsk[cy-1, cx] = 0.5
-        coord_list[cy-1, cx, 2] = 0.5
+        rsk[cy-1, cx] = 0.65
+        coord_list[cy-1, cx, 2] = 0.65
     # Izquierda
     if 0 <= cy < height and 0 <= cx-1 < width:
-        rsk[cy, cx-1] = 0.5
-        coord_list[cy, cx-1, 2] = 0.5
+        rsk[cy, cx-1] = 0.65
+        coord_list[cy, cx-1, 2] = 0.65
 
 rsk_image = colorear_celdas(fire_img, rsk,fire_coordinates)
 

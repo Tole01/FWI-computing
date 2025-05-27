@@ -37,9 +37,9 @@ def colorear_celdas(imagen, matriz, fire_coordinates):
         for col in range(16):
             valor = matriz[fila][col]
             if valor <= 0.42:
-                color = (170, 232, 238)  # Verde (BGR)
+                color = (128, 243, 255)  # Verde (BGR)
             elif valor <= 0.55:
-                color = (71, 99, 255)  # Amarillo
+                color = (0, 128, 255)  # Amarillo
             else:
                 color = (21, 21, 155)  # Rojo
 
