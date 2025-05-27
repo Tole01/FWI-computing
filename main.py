@@ -22,7 +22,7 @@ img_height, img_width = fire_img.shape[:2]
 print(f"Imagen óptica capturada: {img_height}x{img_width} píxeles")
 
 fire_location = []
-for cx,cy in fire_coordinates:
+for cy,cx in fire_coordinates:
     lat, lon = pixel_to_gps(cx, cy, img_height, img_width, drone_height, drone_lat, drone_lon, FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL)
     fire_location.append((lat, lon))
 fire_location = np.array(fire_location)
@@ -48,17 +48,29 @@ print(f"🔥🔥Incendio: Latitud: {lat_fire}, Longitud: {lon_fire}")
 rsk, coord_list, fire_cells = mesh_segmentation2(fire_img, drone_lat, drone_lon, drone_height,hotspots,hotspot_location,t_amb, thermal_matrix, fire_location)
 
 print(f'fire cells {fire_cells}')
-for cy,cx in fire_cells:
-    rsk[cy,cx] = 1
-    coord_list[cy,cx,2] = 1
-    rsk[cy+1,cx] = 0.5
-    coord_list[cy+1,cx,2] = 0.5
-    rsk[cy,cx+1] = 0.5
-    coord_list[cy,cx+1,2] = 0.5
-    rsk[cy-1,cx] = 0.5
-    coord_list[cy-1,cx,2] = 0.5
-    rsk[cy,cx-1] = 0.5
-    coord_list[cy,cx-1,2] = 0.5
+height, width = rsk.shape
+
+for cy, cx in fire_cells:
+    # Centro
+    if 0 <= cy < height and 0 <= cx < width:
+        rsk[cy, cx] = 1
+        coord_list[cy, cx, 2] = 1
+    # Arriba
+    if 0 <= cy+1 < height and 0 <= cx < width:
+        rsk[cy+1, cx] = 0.5
+        coord_list[cy+1, cx, 2] = 0.5
+    # Derecha
+    if 0 <= cy < height and 0 <= cx+1 < width:
+        rsk[cy, cx+1] = 0.5
+        coord_list[cy, cx+1, 2] = 0.5
+    # Abajo
+    if 0 <= cy-1 < height and 0 <= cx < width:
+        rsk[cy-1, cx] = 0.5
+        coord_list[cy-1, cx, 2] = 0.5
+    # Izquierda
+    if 0 <= cy < height and 0 <= cx-1 < width:
+        rsk[cy, cx-1] = 0.5
+        coord_list[cy, cx-1, 2] = 0.5
 
 rsk_image = colorear_celdas(fire_img, rsk,fire_coordinates)
 
