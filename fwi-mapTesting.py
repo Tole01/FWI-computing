@@ -1,4 +1,5 @@
-import numpy
+import numpy as np
+import folium
 import math
 import ee
 import geemap
@@ -7,9 +8,19 @@ import datetime
 
 def risk_score(ndvi,slope,thermal):
 
-    ndviWeight = 3.8987
-    slopeWeight = 1.3073
-    thermalWeight = 2.3786
+    #Para sacar el peso individual de cada variable se sumaron sus IV's resultantes del análisis con el script de woe-data2.py
+    # IV de NDVI = 3.8987
+    # IV de Temperatura = 2.3786
+    # IV de Pendiente = 1.3073
+    # 3.8987 + 2.3786 + 1.3073 = 7.5846
+    # De ahí, se sacó su peso relativo dividiendo cada IV entre el IV resultante 
+    # ndviWeight = 3.8987/7.5846
+    # slopeWeight = 1.3073/7.5846
+    # thermalWeight = 2.3786/7.5846
+    # Teniendo así los siguientes pesos   
+    ndviWeight = 0.5142
+    slopeWeight = 0.1722
+    thermalWeight = 0.3136
 
     #Conversión a °C en caso de ser necesario
     thermal = (thermal*0.2) - 273.15
@@ -18,13 +29,20 @@ def risk_score(ndvi,slope,thermal):
     return score
 
 def visualizar_riesgo(ndvi,slope,lst_image):
-    ndviWeight = 3.8987
-    slopeWeight = 1.3073
-    thermalWeight = 2.3786
-
+    ndviWeight = 0.5142
+    slopeWeight = 0.1722
+    thermalWeight = 0.3136
     #Cálculo del índice de riesgo como imagen en EE
     riesgo_img = ndvi.multiply(ndviWeight).add(slope.multiply(slopeWeight)).add(lst_image.multiply(thermalWeight)).rename("Riesgo")
     return riesgo_img
+
+def visualizar_riesgo(ndvi, pendiente, lst_image):
+    riesgo = calcular_riesgo(ndvi, pendiente, lst_image)  # Image
+    mapa = geemap.Map(center=[LAT, LON], zoom=10)
+    vis_params = {'min': 0, 'max': 3000, 'palette': ['green', 'yellow', 'orange', 'red', 'purple']}
+    mapa.addLayer(riesgo, vis_params, "Índice de Riesgo de Incendio")
+    return mapa
+
 
 def spread_rate(deltaH, windSpeed, slopeAng, ignitionHeat):
 
@@ -48,53 +66,46 @@ ee.Initialize(project='light-sunup-288723')  # Usa tu ID si es diferente
 #lat = float(24.878499)
 #long = float(-99.740625)
 
-#Pasadena, Los Ángeles
-lat = float(34.156113)
-long = float(-118.131943)
+#Kinneloa Mesa, California
+#lat = float(34.17701509740776)
+#long = float(-118.0868291759312)
+
+#Pasadena, California
+lat = float(34.21113114902449) 
+long = float(-118.1138591514406)
 
 #Creación de punto geométrico
 punto = ee.Geometry.Point([long,lat])
-area = punto.buffer(5000)
+area = punto.buffer(10000)
 
 #Definición de fecha
 hoy = datetime.date.today()
 #inicio = ee.Date(str(hoy - datetime.timedelta(days=7)))
 #fin = ee.Date(str(hoy))
 #Debido a que algunas bases de datos tienen retraso de unas semanas, se van a usar las siguientes fechas
-inicio = '2025-01-1'
-fin = '2025-01-31'
+inicio = '2021-04-1'
+fin = '2021-04-30'
+
+#Importar datos históricos de incendios o áreas quemadas
+burntAreas = ee.ImageCollection('MODIS/061/MCD64A1').filterDate(inicio,fin).select('')
 
 #Importar datos de NDVI
 # MODIS/061/MOD13Q1 --> Base de datos de NDVI con cadencia de 16 días
-
-ndvi = ee.ImageCollection('MODIS/061/MOD13Q1').filterDate(inicio, fin).select('NDVI').sort('system:time_start',False)\
-.mean().clip(area)
+ndvi = ee.ImageCollection('MODIS/061/MOD13Q1').filterDate(inicio, fin).select('NDVI').sort('system:time_start',False).mean().clip(area)
 
 #Importar datos de Temperatura de Superficie Terrestre
-
-modis = ee.ImageCollection("MODIS/061/MOD11A1") \
-    .filterBounds(punto) \
-    .filterDate(inicio, fin) \
-    .sort('system:time_start', False) \
-    .first()
+#MODIS/061/MOD11A1 --> Base de dasos de Temperatura de Superficie Terrestre con cadencia de 8 días
+modis = ee.ImageCollection("MODIS/061/MOD11A1").filterBounds(punto).filterDate(inicio, fin).sort('system:time_start', False).first()
+#Promedio de lst y conversión a °C
 lst_image = modis.select('LST_Day_1km').multiply(0.02).subtract(273.15).rename('Temperatura_C').clip(area)
 
-#MODIS/061/MOD11A2 --> Base de dasos de Temperatura de Superficie Terrestre con cadencia de 8 días
-#lst_collection = ee.ImageCollection('MODIS/061/MOD11A2').filterDate(inicio,fin).select('LST_Day_1km')
-
-#print('Número de imágenes LST:', lst_collection.size().getInfo())
-#Promedio de lst y conversión a °C
-#lst_image = lst_collection.mean().multiply(0.02).subtract(273.15).rename('Temperatura_C').clip(area)
-
 #Importar datos de Velocidad del Viento
-
 #NOAA/GFS0P25 --> GFS: Global Forecast System Predicted Atmosphere Data con cadencia de 6 horas
-wind_collection = ee.ImageCollection('NOAA/GFS0P25').filterDate(inicio,fin)\
-    .sort('system:time_start',False).select(['u_component_of_wind_10m_above_ground','v_component_of_wind_10m_above_ground'])
+wind_collection = ee.ImageCollection('NOAA/GFS0P25').filterDate(inicio,fin).sort('system:time_start',False).select(['u_component_of_wind_10m_above_ground','v_component_of_wind_10m_above_ground'])
 
 #Media de componentes U & V
-meanU = wind_collection.select('u_component_of_wind_10m_above_ground').mean()
-meanV = wind_collection.select('v_component_of_wind_10m_above_ground').mean()
+meanU = wind_collection.select('u_component_of_wind_10m_above_ground').mean().rename('U')
+meanV = wind_collection.select('v_component_of_wind_10m_above_ground').mean().rename('V')
 
 #Cálculo de magnitud del viendo y renombre de variable
 wind_speed = meanU.hypot(meanV).rename('WindSpeed_m/s').clip(area)
@@ -104,66 +115,83 @@ dem = ee.Image('USGS/SRTMGL1_003')
 slope = ee.Terrain.slope(dem).rename('Pendiente_Angulo').clip(area)
 
 #Combinamos en una sola imagen
-imagen_completa = ndvi.rename('NDVI').addBands(lst_image).addBands(wind_speed).addBands(slope)
+imagen_completa = ndvi.rename('NDVI').addBands(lst_image).addBands(wind_speed).addBands(slope).addBands(meanU).addBands(meanV)
 
 #Muestreo de datos dentro del Buffer
-muestreo = imagen_completa.sample(region=area,scale=100,numPixels=100,geometries=True)
-
-#Lo Convertimos a un diccionario
+# (Después de crear imagen_completa)
+muestreo = imagen_completa.sample(region=area, scale=100, numPixels=100, geometries=True)
 datos = muestreo.getInfo()
+print(datos['features'])
 
-for feature in datos['features']:
-    props = feature['properties']
-    coords = feature['geometry']['coordinates']
+# Validamos si hay datos antes de continuar
+if not datos['features']:
+    print("No se encontraron datos para las coordenadas y fechas especificadas.")
+    riesgo_mapa = None
+else:
+    riesgo_mapa = visualizar_riesgo(ndvi, slope, lst_image)
+    for feature in datos['features']:
+        viento_layer = folium.FeatureGroup(name='Dirección del Viento')
+        props = feature['properties']
+        coords = feature['geometry']['coordinates']
 
-    valor_ndvi = props['NDVI']
-    valor_wind = props['WindSpeed_m/s']
-    valor_temp = props['Temperatura_C']
-    valor_pendiente = props['Pendiente_Angulo']
+        valor_ndvi = props['NDVI']
+        valor_wind = props['WindSpeed_m/s']
+        valor_temp = props['Temperatura_C']
+        valor_pendiente = props['Pendiente_Angulo']
+        u = props['U']
+        v = props['V']
 
-    #Conversión a radianes del valor de la pendiente
-    valor_pendiente_rad = math.radians(valor_pendiente)
+        lat, lon = coords[1],coords[0] #Porque en Json usa [lon,lat]
 
-    #Cálculo de índice de riesgo
-    riesgo_estimado = risk_score(valor_ndvi,valor_pendiente_rad,valor_temp)
-    if riesgo_estimado <= 10000:
-        nivel = "Muy Bajo"
-    elif riesgo_estimado <= 14000:
-        nivel = "Bajo"
-    elif riesgo_estimado <= 17000:
-        nivel = "Moderado"
-    elif riesgo_estimado <= 20000:
-        nivel = "Alto"
-    elif riesgo_estimado <= 25000:
-        nivel = "Muy Alto"
-    else:
-        nivel = "Extremo"
+        valor_pendiente_rad = math.radians(valor_pendiente)
 
-    print(f"Índice de riesgo: {riesgo_estimado:.2f} ({nivel})")
+        riesgo_estimado = risk_score(valor_ndvi, valor_pendiente_rad, valor_temp)
 
-    riesgo_mapa = visualizar_riesgo(ndvi,slope,lst_image)
-    print(f"Coordenadas: {coords}")
-    print(f"NDVI: {valor_ndvi}, Temp: {valor_temp} °C, Viento: {valor_wind} m/s, Pendiente: {valor_pendiente}°")
-    print(f"Índice de riesgo: {riesgo_estimado:.2f}")
+        if riesgo_estimado <= 1000:
+            nivel = "Muy Bajo"
+        elif riesgo_estimado <= 1800:
+            nivel = "Bajo"
+        elif riesgo_estimado <= 2200:
+            nivel = "Moderado"
+        elif riesgo_estimado <= 2600:
+            nivel = "Alto"
+        elif riesgo_estimado <= 3000:
+            nivel = "Muy Alto"
+        else:
+            nivel = "Extremo"
+
+        print(f"Índice de riesgo: {riesgo_estimado:.2f} ({nivel})")
+        print(f"Coordenadas: {coords}")
+        print(f"NDVI: {valor_ndvi}, Temp: {valor_temp} °C, Viento: {valor_wind} m/s, Pendiente: {valor_pendiente}°")
+        print(f"Índice de riesgo: {riesgo_estimado:.2f}")
+
+        # Agregar flecha al mapa si u y v son válidos
+        if not math.isnan(u) and not math.isnan(v):
+            angle = math.degrees(math.atan2(v, u))
+            folium.Marker(
+                location=[lat, lon],
+                icon=folium.Icon(icon='arrow-up', angle=angle, prefix='fa', color='blue')).add_to(viento_layer)
 
 #Se usó Geemap para crear el mapa y luego agregar los puntos 
 #en base a su puntuación calculada de riesgo
-mapa_de_calor = geemap.Map(center=[lat,long], zoom = 15)
-
+mapa_de_calor = geemap.Map(center=[lat,long], zoom = 11)
+riesgo_mapa.add_child(viento_layer)
 #Agregamos el riesgo estimado al mapa recién creado
-riesgo_vis = {'min': 9000,'max': 25000,'palette': ['00ff00', '66ff00', '99ff00', 'ccff00','ffff00','ffcc00','ff9900','ff6600','ff3300','ff0000']}  # Verde -> Rojo
+riesgo_vis = {'min': 900,'max': 3300,'palette': ['00ff00', '66ff00', '99ff00', 'ccff00','ffff00','ffcc00','ff9900','ff6600','ff3300','ff0000']}  # Verde -> Rojo
+mapa_de_calor(riesgo_mapa,riesgo_vis, "Índice de Riesgo de Incendio", opacity=1.0)
+mapa_de_calor.addLayer(punto,{'color':'blue'},'Punto central del incendio')
 
-mapa_de_calor.addLayer(riesgo_mapa,riesgo_vis, "Índice de Riesgo de Incendio", opacity=0.85)
-mapa_de_calor.addLayer(area, {},'Área analizada')
+mapa_de_calor.addLayer(riesgo_mapa,riesgo_vis, "Índice de Riesgo de Incendio", opacity=1.0)
 mapa_de_calor.addLayer(punto,{'color':'blue'},'Punto central del incendio')
 
 mapa_de_calor.to_html('fwi-heatmap.html')
 webbrowser.open('fwi-heatmap.html')
-#mapa_de_calor.add_colorbar(vis_params=riesgo_vis, label='Índice de Riesgo')
+# Agregar flechas de viento
+
+
 
 # Save the map as HTML
 html_file = "fwi-heatmap.html"
-mapa_de_calor.to_html(html_file)
 
 # Define the color bar HTML
 colorbar_html = """
@@ -226,7 +254,6 @@ with open(html_file, "r+", encoding="utf-8") as file:
         content = content.replace("</body>", colorbar_html + "</body>")
     file.seek(0)
     file.write(content)
-
 slider_html = """
 <script>
     let map;  // Referencia global
@@ -283,8 +310,7 @@ with open(html_file, "r+", encoding="utf-8") as file:
 
 print("Slider de control dinámico de radio añadido.")
 
-
 # Open the modified HTML file
-webbrowser.open(html_file)
+#webbrowser.open(html_file)
 
 print(f"Color bar added to {html_file}")
