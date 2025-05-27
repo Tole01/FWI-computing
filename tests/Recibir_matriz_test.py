@@ -1,42 +1,61 @@
 import serial
-import matplotlib.pyplot as plt
+import time
 import numpy as np
+import matplotlib.pyplot as plt
 
-def recibir_matriz(ser):
-    matriz = []
-    leyendo = False
+
+def get_temp_matrix(puerto, baudios=115200, timeout=20):
+    try:
+        ser = serial.Serial(puerto, baudios, timeout=1)
+    except serial.SerialException as e:
+        print(f"Error al abrir el puerto serial: {e}")
+        return None
+
+    print("Esperando <START>...")
+    start_time = time.time()
+    buffer = ""
+
+    # Esperar hasta encontrar <START>
     while True:
-        line = ser.readline().decode(errors="ignore").strip()
-        if line == "<START>":
-            leyendo = True
-            matriz = []
-            continue
-        elif line == "<END>":
-            break
-        elif leyendo:
-            try:
-                fila = [int(x) for x in line.split(",")]
-                if len(fila) == 16:
-                    matriz.append(fila)
-            except ValueError:
-                continue  # Ignora líneas corruptas
-    return matriz
+        if time.time() - start_time > timeout:
+            print("Tiempo máximo de espera alcanzado.")
+            ser.close()
+            return None
 
-# Ajusta el puerto según tu sistema
-ser = serial.Serial('COM7', 115200, timeout=1)
+        if ser.in_waiting:
+            chunk = ser.read(ser.in_waiting).decode(errors='ignore')
+            buffer += chunk
+            if "<START>" in buffer:
+                buffer = buffer.split("<START>")[1]
+                break
 
-while True:
-    matriz = recibir_matriz(ser)
-    if len(matriz) == 9:
-        print("✅ Matriz recibida (9x16):")
-        for fila in matriz:
-            print(fila)
-    else:
-        print("❌ Matriz incompleta o malformada.")
+    print("<START> detectado. Leyendo datos hasta <END>...")
 
+    # Leer hasta <END>
+    while "<END>" not in buffer:
+        if ser.in_waiting:
+            chunk = ser.read(ser.in_waiting).decode(errors='ignore')
+            buffer += chunk
+        else:
+            time.sleep(0.01)
+
+    ser.close()
+    datos_brutos = buffer.split("<END>")[0].strip()
+    filas = datos_brutos.strip().splitlines()
+
+    try:
+        matriz = [list(map(float, fila.strip().split(','))) for fila in filas]
+        return np.array(matriz, dtype=np.float32)
+    except Exception as e:
+        print(f"Error al convertir a matriz: {e}")
+        return None
+    
+if __name__ == "__main__":
+    matriz_temp = get_temp_matrix('COM3')
+    
     # Mostrar heatmap
     plt.figure(figsize=(10, 6))
-    plt.imshow(matriz, cmap='inferno')
+    plt.imshow(matriz_temp, cmap='inferno')
     plt.colorbar(label="Temperatura (°C)")
     plt.title("Mapa de calor con hotspots")
     plt.tight_layout()
