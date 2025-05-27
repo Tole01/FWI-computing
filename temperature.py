@@ -36,8 +36,8 @@ def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix,
         if dlon != 0:
             dif_lon = dlon if dif_lon is None else min(dif_lon, dlon)
 
-    for col in range(coordinates.shape[1]):
-        for row in range(coordinates.shape[0]):
+    for row in range(coordinates.shape[0]):
+        for col in range(coordinates.shape[1]):
             lat, lon = coordinates[row][col]
             lat2, lon2 = lat + dif_lat, lon + dif_lon
             dentro = hotspot_en_area(hotspot_location,lat,lon,lat2,lon2)
@@ -56,9 +56,9 @@ def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix,
                 temp_array[row][col] = (t_amb +10) / 150 #normalizar entre 0 y 1
 
             if fire_cells_loc:
-                for idx, (lat, lon) in fire_cells_loc:
-                    cx, cy = col, row
-                    fire_cells.append((cy, cx))
+                cx, cy = col, row
+                fire_cells.append((cy, cx))
+                print(f'fire cell: {cy, cx}')
     
     fire_cells = np.array(fire_cells)
     return temp_array,fire_cells
