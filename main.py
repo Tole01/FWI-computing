@@ -52,9 +52,8 @@ height, width = rsk.shape
 
 for cy, cx in fire_cells:
     # Centro
-    if 0 <= cy < height and 0 <= cx < width:
-        rsk[cy, cx] = 1
-        coord_list[cy, cx, 2] = 1
+    rsk[cy, cx] = 1
+    coord_list[cy, cx, 2] = 1
     # Arriba
     if 0 <= cy+1 < height and 0 <= cx < width:
         rsk[cy+1, cx] = 0.65
@@ -118,11 +117,6 @@ def mapbox3d():
 def geojson():
     print("🛰️ Sirviendo:", os.path.abspath("riesgo.geojson"))
     return send_from_directory(".", "riesgo.geojson")
-
-#@app.route("/riesgo.geojson")
-#def geojson():
-#    print("🛰️ Sirviendo:", os.path.abspath("riesgo.geojson"))
-#    return send_file("riesgo.geojson", cache_timeout=0)
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)

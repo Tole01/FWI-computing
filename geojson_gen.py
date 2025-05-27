@@ -34,9 +34,9 @@ def generar_geojson(coord_list):
     #print(matriz)
 
     step = calcular_step(matriz)
-    print(f"Step calculado: {step}")
+    #print(f"Step calculado: {step}")
 
-    print(matriz.shape)
+    #print(matriz.shape)
     features = []
     
     for row in matriz:

@@ -1,4 +1,6 @@
 import serial
+import matplotlib.pyplot as plt
+import numpy as np
 
 def recibir_matriz(ser):
     matriz = []
@@ -31,3 +33,11 @@ while True:
             print(fila)
     else:
         print("❌ Matriz incompleta o malformada.")
+
+    # Mostrar heatmap
+    plt.figure(figsize=(10, 6))
+    plt.imshow(matriz, cmap='inferno')
+    plt.colorbar(label="Temperatura (°C)")
+    plt.title("Mapa de calor con hotspots")
+    plt.tight_layout()
+    plt.show()
