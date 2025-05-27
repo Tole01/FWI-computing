@@ -5,7 +5,7 @@ from utils import get_weather_data, get_ndvi, get_slope
 from classes import calculate_fwi
 from temperature import get_temperature
 from utils import normalizar
-
+from config import FOV_OPTICA_HORIZONTAL,FOV_OPTICA_VERTICAL
 weights = {}
 
 # Camera resolution parameters (substitute for Walksnail Moonlight)
@@ -121,7 +121,8 @@ def generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height):
     
     # Apply pixel_to_gps function to bothp y, x pixel arrays
     lats, lons = pixel_to_gps_vectorized(y_pixels, x_pixels, img_width, 
-                                       img_height, d_height, d_lat, d_lon)
+                                       img_height, d_height, d_lat, d_lon,
+                                       FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL)
    
     # Stack both arrays to generate a 3-D array with (lat, lon) pairs as items
     coords = np.stack((lats, lons), axis=-1)
@@ -157,19 +158,23 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
         print('LLamando APIs')
         temp = get_temperature(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix)
         print(f'Temperatura terminada')
+        print(temp)
 
         ndvi = get_ndvi_vectorized(lat, lon)
         ndvi_norm = normalizar(ndvi)
         print(f'NDVI terminado')
+        print(ndvi_norm)
 
         slopes = get_slope_vectorized(lat, lon)
         slopes_norm = normalizar(slopes)
         print(f'Pendiente terminado')
+        print(slopes_norm)
 
         weather = get_weather_data_vectorized(lat, lon)
         fwi = get_fwi_vectorized(weather)
         bui = np.vectorize(lambda array: array['BUI'], otypes=[float])(fwi)
         print(f'BUI terminado')
+        print(bui)
         print('____________________________________________________________________')
 
     except Exception as e:
