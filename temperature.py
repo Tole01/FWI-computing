@@ -16,11 +16,14 @@ temp_array[50:60, 50:60] = 92
 
 temp_matrix = temp_array
 
-def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix):
+def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix, fire_location):
 
     temp_array = np.empty((coordinates.shape[0], coordinates.shape[1]), dtype=np.float32)
     dif_lat = None
     dif_lon = None
+
+    fire_cells_loc = []
+    fire_cells = []
 
     for i in range(1, len(coordinates)):
         lat1, lon1 = coordinates[i - 1][i-1]  
@@ -38,7 +41,8 @@ def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix)
             lat, lon = coordinates[row][col]
             lat2, lon2 = lat + dif_lat, lon + dif_lon
             dentro = hotspot_en_area(hotspot_location,lat,lon,lat2,lon2)
-            
+            fire_cells_loc = hotspot_en_area(fire_location,lat,lon,lat2,lon2)
+
             hotspot_temp = None
             if dentro:
                 # Si el hotspot está dentro de la celda, asignar la temperatura del hotspot
@@ -50,8 +54,14 @@ def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix)
             else:
                 # Si no está dentro de un hotspot, asignar la temperatura ambiente
                 temp_array[row][col] = (t_amb +10) / 150 #normalizar entre 0 y 1
+
+            if fire_cells_loc:
+                for idx, (lat, lon) in fire_cells_loc:
+                    cx, cy = col, row
+                    fire_cells.append((cy, cx))
     
-    return temp_array
+    fire_cells = np.array(fire_cells)
+    return temp_array,fire_cells
 
 def get_temp_matrix(puerto=COM_ESP, baudios=115200, timeout=20):
     try:
