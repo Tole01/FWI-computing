@@ -15,7 +15,7 @@ tif = "wind_global.tif"
 leafmap.netcdf_to_tif(filename, tif, variables=["u_wind", "v_wind"], shift_lon=True)
 geojson = ("https://github.com/opengeos/leafmap/raw/master/examples/data/countries.geojson")
 
-m = leafmap.Map(layers_control=True)
+m = leafmap.Map(center=[34.21113114902449,-118.1138591514406],layers_control=True,zoom=7)
 m.add_basemap("CartoDB.DarkMatter")
 m.add_velocity(
     filename,
