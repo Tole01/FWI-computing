@@ -1,9 +1,10 @@
 import numpy as np
 from classes import meshCell
 from coordinates import pixel_to_gps, pixel_to_gps_vectorized
-from utils import get_weather_data, get_ndvi, get_slope
+from utils import get_weather_data, get_ndvi, get_slope, get_ndvi_batch
 from classes import calculate_fwi
 from temperature import get_temperature
+
 
 weights = {}
 
@@ -95,7 +96,7 @@ def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t
 
     result = np.stack((lats,lons, risk), axis=-1)
 
-    return risk,result
+    return risk, result
 
 
     # Compute indices / Call API's from coords
@@ -161,9 +162,11 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
         print('Starting to compute APIs...')
         temp = get_temperature(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix)
         print(f'{temp}')
-        print('____________________________________________________________________')
-        ndvi = get_ndvi_vectorized(lat, lon)
+
+        print('________________________COMPUTING NDVI_________________________________')
+        ndvi = np.array([get_ndvi_batch(row) for row in coordinates])
         print(f'{ndvi}')
+
         print('____________________________________________________________________')
         slopes = get_slope_vectorized(lat, lon)
         print(f'{slopes}')

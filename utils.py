@@ -7,6 +7,7 @@ import numpy as np
 from PIL import Image
 from io import BytesIO
 import math
+from multiprocessing import Pool
 
 # Credenciales para la API Sentinel Hub (NDVI)
 config = SHConfig()
@@ -33,6 +34,20 @@ function evaluatePixel(sample) {
   return [ndvi];
 }
 """
+
+evalscript_ndvi2 = """
+        //V=3
+        function setup() {
+            return {
+                input: ["B04", "B08"],
+                output: { bands: 1, sampleType: "FLOAT32" }
+            };
+        }
+        function evaluatePixel(sample) {
+            let ndvi = [(sample.B08 - sample.B04) / (sample.B08 + sample.B04)];
+            return [ndvi]
+        }
+        """
 
 def get_weather_data(lat, lon):
     """
@@ -188,6 +203,79 @@ def get_slope(lat, lon):
     return slope_normalized
 
 
+def get_ndvi_batch(coordinates, delta_lat=0.0008):
+    """
+    Fetch NDVI for multiple coordinates in one request.
+
+    Input: coordinates -> 2D NumPy Array containing the [lat, lon] pairs of a batch
+
+    Output: ndvi -> Python list containing NDVI's in order with respect to pairs
+
+    """
+    if isinstance(coordinates, np.ndarray):
+        # Asserts last dimension is a pair of coordinates
+        assert coordinates.shape[1] == 2, f"Numpy Array doesn't have correct dimensions: {coordinates.shape}"
+        width, depth = coordinates.shape
+    
+    else:
+        print("Input must be a python Iterable")
+        return None
+
+    # Flip array to ensure GeoJSON format (lon, lat)
+    # coordinates = np.flip(coordinates, axis=1)
+    print(coordinates)
+
+    # Calcuta delta of polygons from lon variation of entire row
+    upper_lat, upper_lon = coordinates[0]
+    lower_lat, lower_lon = coordinates[-1]
+
+    delta_lon = abs(upper_lon - coordinates[1, 1])
+    # Update lat and lon to generate rectangle geometry (Negative as it decreases downward and increases to the right)
+    lower_lat -= delta_lat
+    lower_lon += delta_lon
+    
+    # Create bounding box of interest
+    bbox = BBox(bbox=[upper_lon, upper_lat, lower_lon, lower_lat], crs=CRS.WGS84)
+
+    # Make the request
+    request = SentinelHubRequest(
+        evalscript= evalscript_ndvi2,
+        input_data=[
+            SentinelHubRequest.input_data(
+                data_collection=DataCollection.SENTINEL2_L2A,
+                time_interval=('2024-12-01', '2025-04-01'),
+                mosaicking_order='mostRecent',
+                maxcc=0.5
+            )
+        ],
+        responses=[
+            SentinelHubRequest.output_response('default', MimeType.TIFF)
+        ],
+        bbox=bbox,
+        size=(width, 1),
+        # size=(width * 2, depth),
+        config=config
+    )
+    try:
+        response = request.get_data()
+        ndvi_array = response[0]
+        # Compute Average of Cells
+        # Normalizes range between 0 - 1
+        normalized_array = (ndvi_array + 1) / 2 # 
+
+        return normalized_array
+    except Exception as e:
+        raise Exception(f"API request failed: {str(e)}")
+     
+
+def batch_average(batch, width, step=2):
+    '''Compute the averag NDVI for each batch'''
+    for i in range(0, width - 2, step):
+        first_row = batch[i, i + step]
+        second_row = batch[i, i + step]
+    pass
+
+
 # Assigned weight to parameters
 weights = {'NDVI': 0.23, 'SLOPE': 0.03, 'THERMAL': 0.48, 'BUI': 0.26}
 
@@ -237,3 +325,47 @@ def normalizar(arr):
     normalized_arr = (arr - min_val) / (max_val - min_val)
     
     return normalized_arr
+
+
+def get_ndvi_batched(coordinates, batch_size=5, max_workers=4):
+    """
+    Process coordinates in batches using multiprocessing.
+    
+    Args:
+        coordinates: List of (lat, lon) tuples
+        batch_size: Number of points per API request
+        max_workers: Number of parallel processes
+    """
+    # Group coordinates into batches
+    batches = [coordinates[i:i+batch_size] 
+               for i in range(0, len(coordinates), batch_size)]
+    
+    # Process batches in parallel
+    with Pool(processes=max_workers) as pool:
+        results = pool.map(process_batch, batches)
+    
+    # Flatten results
+    return np.concatenate(results)
+
+def process_batch(coords):
+    """Process a batch of coordinates"""
+    try:
+        # If points are close, use single request
+        if are_points_close(coords):
+            return get_ndvi_batch(coords)
+        # Otherwise process individually
+        return [get_ndvi(lat, lon) for lat, lon in coords]
+    except Exception as e:
+        # Implement retry or other error handling
+        return [np.nan] * len(coords)
+    
+def are_points_close(coords):
+    '''Verifies that points are close or not
+    Input: coords -> coordinates list
+    Output: True if all coordinates are within a range
+            False if not
+    '''
+    max_lat, min_lat = max([gps_tuple[0] for gps_tuple in coords]), 
+    max_lon, min_lot = max([gps_tuple[1] for gps_tuple in coords])
+    
+    pass
