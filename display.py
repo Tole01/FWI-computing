@@ -37,9 +37,9 @@ def colorear_celdas(imagen, matriz, fire_coordinates):
         for col in range(16):
             valor = matriz[fila][col]
             if valor <= 0.42:
-                color = (170, 232, 238)  # Verde (BGR)
+                color = (128, 243, 255)  # Verde (BGR)
             elif valor <= 0.55:
-                color = (71, 99, 255)  # Amarillo
+                color = (0, 128, 255)  # Amarillo
             else:
                 color = (21, 21, 155)  # Rojo
 
@@ -59,52 +59,66 @@ def colorear_celdas(imagen, matriz, fire_coordinates):
 
     return output
 
-'''
-if __name__ == "__main__":
+import cv2
+import numpy as np
 
-    # Tu matriz desnormalizada
-    Temperature_matrix = np.array([
-        [135, 100,  40,  40,  80, 135,  30,  30,  60, 120, 130, 130, 130,  90,  60,  25],
-        [130, 100, 140,  60, 135,  75, 100,  30,  25,  25,  25,  25,  25, 130, 130,  70],
-        [130, 120,  35, 130, 130, 100, 100,  30, 135, 135, 105,  25,  25,  25,  25,  25],
-        [ 40,  70, 130,  70,  25, 100,  70, 130, 135,  85,  70,  25,  25,  25,  25,  25],
-        [130,  25, 100, 130, 100, 100, 130, 135, 100,  25, 100, 100, 100,  25,  25,  25],
-        [135, 120, 100,  25,  25, 100,  25, 100,  25,  25,  95, 100, 100,  85,  25,  25],
-        [ 85, 110,  85, 115, 135,  25,  25,  25,  25,  25,  25, 100, 135, 130,  25,  25],
-        [ 25,  25,  25, 115, 130,  25,  25,  25, 100, 120, 120,  90, 135,  90, 135,  30],
-        [ 30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  90, 130,  90,  30]
-    ]) #Recibirla del ESP32
+def crop_optical_to_thermal(
+    optical_img,
+    optical_width_px, optical_height_px,
+    optical_fov_h, optical_fov_v,
+    drone_height_m,
+    thermal_width_px, thermal_height_px,
+    thermal_fov_h, thermal_fov_v
+):
+    """
+    Recorta la imagen óptica para que coincida con el área visible de la cámara térmica.
 
-    # Crear el heatmap
-    plt.figure(figsize=(14, 6))
-    sns.heatmap(Temperature_matrix, annot=True, fmt="d", cmap="YlOrRd", cbar=True)
-    plt.title("Mapa de Calor - Matriz de Riesgo")
-    plt.xlabel("Columna")
-    plt.ylabel("Fila")
-    plt.tight_layout()
-    plt.show()
+    Parámetros:
+    - optical_img: imagen RGB (np.array)
+    - optical_width_px: ancho en píxeles de la imagen óptica
+    - optical_height_px: alto en píxeles de la imagen óptica
+    - optical_fov_h: FOV horizontal óptico en grados
+    - optical_fov_v: FOV vertical óptico en grados
+    - drone_height_m: altura del dron en metros
+    - thermal_width_px: resolución horizontal de la imagen térmica
+    - thermal_height_px: resolución vertical de la imagen térmica
+    - thermal_fov_h: FOV horizontal térmico en grados
+    - thermal_fov_v: FOV vertical térmico en grados
 
-    risk_matrix = np.array([
-        [0.967, 0.933, 0.333, 0.333, 0.6, 0.967, 0.267, 0.267, 0.467, 0.867, 0.933, 0.933, 0.933, 0.667, 0.467, 0.233],
-        [0.933, 0.933, 1.0, 0.467, 0.967, 0.667, 0.733, 0.267, 0.533, 0.533, 0.533, 0.333, 0.233, 0.933, 0.933, 0.533],
-        [0.933, 0.967, 0.3, 0.933, 0.933, 0.733, 0.733, 0.267, 0.967, 0.967, 0.967, 0.533, 0.233, 0.233, 0.233, 0.233],
-        [0.333, 0.633, 0.933, 0.633, 0.233, 0.733, 0.533, 0.933, 0.967, 0.7, 0.633, 0.533, 0.233, 0.233, 0.233, 0.233],
-        [0.933, 0.233, 0.733, 0.933, 0.733, 0.733, 0.933, 0.967, 0.833, 0.233, 0.733, 0.733, 0.733, 0.233, 0.233, 0.233],
-        [0.967, 0.867, 0.733, 0.233, 0.233, 0.733, 0.233, 0.833, 0.233, 0.233, 0.7, 0.733, 0.733, 0.633, 0.233, 0.233],
-        [0.633, 0.8, 0.633, 0.833, 0.967, 0.233, 0.233, 0.233, 0.233, 0.233, 0.233, 0.733, 0.967, 0.933, 0.233, 0.233],
-        [0.233, 0.233, 0.233, 0.833, 0.93, 0.233, 0.233, 0.233, 0.733, 0.867, 0.867, 0.667, 0.967, 0.667, 0.967, 0.267],
-        [0.267, 0.267, 0.267, 0.267, 0.267, 0.267, 0.267, 0.267, 0.267, 0.267, 0.267, 0.267, 0.667, 0.933, 0.667, 0.267]
-    ]) #necesito que me llegue esta matriz
+    Retorna:
+    - Imagen óptica recortada y redimensionada al tamaño de la imagen térmica.
+    """
 
-    imagen_resultado = colorear_celdas(r"firetest11.jpg", risk_matrix) #ultima imagen adquitida de la camara optica
-    cv2.imshow("Resultado", imagen_resultado)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # Calcular el tamaño del área cubierta por la cámara óptica y térmica en metros
+    optical_width_m = 2 * drone_height_m * np.tan(np.radians(optical_fov_h / 2))
+    optical_height_m = 2 * drone_height_m * np.tan(np.radians(optical_fov_v / 2))
 
-    #segunda iteracion
-    kernel_matrix = kernel(risk_matrix)
-    kernel_resultado = colorear_celdas(r"firetest11.jpg", kernel_matrix)
-    cv2.imshow("Resultado con Kernel", kernel_resultado)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    '''
+    thermal_width_m = 2 * drone_height_m * np.tan(np.radians(thermal_fov_h / 2))
+    thermal_height_m = 2 * drone_height_m * np.tan(np.radians(thermal_fov_v / 2))
+
+    # Calcular cuántos metros cubre cada píxel de la imagen óptica
+    optical_m_per_px_x = optical_width_m / optical_width_px
+    optical_m_per_px_y = optical_height_m / optical_height_px
+
+    # Calcular tamaño del recorte en píxeles (equivalente al área térmica)
+    crop_width_px = int(thermal_width_m / optical_m_per_px_x)
+    crop_height_px = int(thermal_height_m / optical_m_per_px_y)
+
+    # Centro del recorte
+    x_center = optical_width_px // 2
+    y_center = optical_height_px // 2
+
+    x_start = max(x_center - crop_width_px // 2, 0)
+    y_start = max(y_center - crop_height_px // 2, 0)
+
+    x_end = min(x_start + crop_width_px, optical_width_px)
+    y_end = min(y_start + crop_height_px, optical_height_px)
+
+    cropped_img = optical_img[y_start:y_end, x_start:x_end]
+
+    # Verificación y redimensionamiento
+    if cropped_img.size == 0:
+        raise ValueError("Error: recorte vacío. Verifica los parámetros de entrada.")
+    
+    resized_img = cv2.resize(cropped_img, (thermal_width_px, thermal_height_px))
+    return resized_img

@@ -31,12 +31,12 @@ def generar_geojson(coord_list):
     
     # Matriz con coordenadas y riesgo reales
     matriz = coord_list
-    print(matriz)
+    #print(matriz)
 
     step = calcular_step(matriz)
-    print(f"Step calculado: {step}")
+    #print(f"Step calculado: {step}")
 
-    print(matriz.shape)
+    #print(matriz.shape)
     features = []
     
     for row in matriz:

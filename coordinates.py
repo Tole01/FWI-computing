@@ -1,5 +1,5 @@
 from pymavlink import mavutil
-from config import COM_ANTENA
+from config import COM_ANTENA, FOV_TERMICA_HORIZONTAL, FOV_TERMICA_VERTICAL
 import numpy as np
 import math
 
@@ -29,7 +29,7 @@ def get_coordinates():
     except KeyboardInterrupt:
         print("Conexión terminada.")
 
-def pixel_to_gps(pixel_x, pixel_y, img_width, img_height, height_m, drone_lat, drone_lon, fov_x_deg = 157, fov_y_deg = 140):
+def pixel_to_gps(pixel_x, pixel_y, img_width, img_height, height_m, drone_lat, drone_lon, fov_x_deg, fov_y_deg):
     """
     Transforma coordenadas de píxeles a coordenadas GPS.
 
@@ -79,7 +79,7 @@ def pixel_to_gps(pixel_x, pixel_y, img_width, img_height, height_m, drone_lat, d
     return new_lat, new_lon
 
 
-def pixel_to_gps_vectorized(y_pixels, x_pixels, img_width, img_height, d_height, d_lat, d_lon, fov_x_deg = 157, fov_y_deg = 140):
+def pixel_to_gps_vectorized(y_pixels, x_pixels, img_width, img_height, d_height, d_lat, d_lon, fov_x_deg, fov_y_deg):
     """
     Converts y, x pixel coordinates arrays into GPS coordinates. 
 

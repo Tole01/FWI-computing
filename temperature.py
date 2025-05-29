@@ -7,18 +7,23 @@ from coordinates import hotspot_en_area
 
 np.random.seed(42)
 temp_array = np.random.uniform(20,25, size=(120, 160))
-temp_array[0:7, 0:7] = 127
-temp_array[0:7, 80:85] = 100
-temp_array[0:7, 153:160] = 80
-temp_array[50:55, 0:7] = 80
-temp_array[50:55, 80:85] = 85
+#temp_array[0:10, 0:10] = 135
+#temp_array[50:60, 0:10] = 95
+#temp_array[100:110, 0:10] = 83
+
+#temp_array[0:10, 50:60] = 129
+#temp_array[50:60, 50:60] = 92
+
 temp_matrix = temp_array
 
-def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix):
+def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix, fire_location):
 
     temp_array = np.empty((coordinates.shape[0], coordinates.shape[1]), dtype=np.float32)
     dif_lat = None
     dif_lon = None
+
+    fire_cells_loc = []
+    fire_cells = []
 
     for i in range(1, len(coordinates)):
         lat1, lon1 = coordinates[i - 1][i-1]  
@@ -30,14 +35,14 @@ def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix)
             dif_lat = dlat if dif_lat is None else min(dif_lat, dlat)
         if dlon != 0:
             dif_lon = dlon if dif_lon is None else min(dif_lon, dlon)
-            
-    print(f"Displacement lat: {dif_lat}, lon: {dif_lon}")
-    for col in range(coordinates.shape[1]):
-        for row in range(coordinates.shape[0]):
+
+    for row in range(coordinates.shape[0]):
+        for col in range(coordinates.shape[1]):
             lat, lon = coordinates[row][col]
             lat2, lon2 = lat + dif_lat, lon + dif_lon
             dentro = hotspot_en_area(hotspot_location,lat,lon,lat2,lon2)
-            
+            fire_cells_loc = hotspot_en_area(fire_location,lat,lon,lat2,lon2)
+
             hotspot_temp = None
             if dentro:
                 # Si el hotspot está dentro de la celda, asignar la temperatura del hotspot
@@ -49,8 +54,14 @@ def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix)
             else:
                 # Si no está dentro de un hotspot, asignar la temperatura ambiente
                 temp_array[row][col] = (t_amb +10) / 150 #normalizar entre 0 y 1
+
+            if fire_cells_loc:
+                cx, cy = col, row
+                fire_cells.append((cy, cx))
+                print(f'fire cell: {cy, cx}')
     
-    return temp_array
+    fire_cells = np.array(fire_cells)
+    return temp_array,fire_cells
 
 def get_temp_matrix(puerto=COM_ESP, baudios=115200, timeout=20):
     try:
