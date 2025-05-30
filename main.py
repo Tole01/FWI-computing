@@ -1,15 +1,15 @@
+import cv2
+import os
+import numpy as np
+import matplotlib.pyplot as plt
 from fire_detection import detect_fire
 from mesh import mesh_segmentation2
 from display import NNI_kernel, colorear_celdas, crop_optical_to_thermal
-import cv2
 from ultralytics import YOLO
 from coordinates import pixel_to_gps
 from geojson_gen import generar_geojson
 from flask import Flask, render_template, send_from_directory
 from coordinates import get_coordinates
-import matplotlib.pyplot as plt
-import numpy as np
-import os
 from config import FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL, FOV_TERMICA_HORIZONTAL, FOV_TERMICA_VERTICAL ,THERMAL_WIDTH, THERMAL_HEIGHT
 
 # Inicialización del proceso de detección incendio a través de cámara óptica y térmica YOLOv8

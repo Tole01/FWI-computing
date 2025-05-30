@@ -113,6 +113,7 @@ py-cpuinfo==9.0.0
 pymavlink==2.4.43
 pyparsing==3.2.3
 pyproj==3.7.1
+pyserial==3.5
 python-dateutil==2.9.0.post0
 pytz==2025.2
 PyYAML==6.0.2
