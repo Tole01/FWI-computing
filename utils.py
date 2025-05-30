@@ -207,9 +207,9 @@ def get_ndvi_batch(coordinates, delta_lat=0.0008):
     """
     Fetch NDVI for multiple coordinates in one request.
 
-    Input: coordinates -> 2D NumPy Array containing the [lat, lon] pairs of a batch
+    Input: coordinates -> 2D NumPy Array containing the [lat, lon] pairs of a batch.
 
-    Output: ndvi -> Python list containing NDVI's in order with respect to pairs
+    Output: ndvi -> Numpy 1D Array containing the NDVI value for each pair of the batch.
 
     """
     if isinstance(coordinates, np.ndarray):
@@ -222,8 +222,7 @@ def get_ndvi_batch(coordinates, delta_lat=0.0008):
         return None
 
     # Flip array to ensure GeoJSON format (lon, lat)
-    # coordinates = np.flip(coordinates, axis=1)
-    print(coordinates)
+    # print(coordinates)
 
     # Calcuta delta of polygons from lon variation of entire row
     upper_lat, upper_lon = coordinates[0]
@@ -258,12 +257,12 @@ def get_ndvi_batch(coordinates, delta_lat=0.0008):
     )
     try:
         response = request.get_data()
-        ndvi_array = response[0]
+        ndvi_array = response[0][0]
         # Compute Average of Cells
-        # Normalizes range between 0 - 1
-        normalized_array = (ndvi_array + 1) / 2 # 
-
-        return normalized_array
+       
+        # Return array
+        return ndvi_array
+    
     except Exception as e:
         raise Exception(f"API request failed: {str(e)}")
      
@@ -327,45 +326,4 @@ def normalizar(arr):
     return normalized_arr
 
 
-def get_ndvi_batched(coordinates, batch_size=5, max_workers=4):
-    """
-    Process coordinates in batches using multiprocessing.
-    
-    Args:
-        coordinates: List of (lat, lon) tuples
-        batch_size: Number of points per API request
-        max_workers: Number of parallel processes
-    """
-    # Group coordinates into batches
-    batches = [coordinates[i:i+batch_size] 
-               for i in range(0, len(coordinates), batch_size)]
-    
-    # Process batches in parallel
-    with Pool(processes=max_workers) as pool:
-        results = pool.map(process_batch, batches)
-    
-    # Flatten results
-    return np.concatenate(results)
 
-def process_batch(coords):
-    """Process a batch of coordinates"""
-    try:
-        # If points are close, use single request
-        if are_points_close(coords):
-            return get_ndvi_batch(coords)
-        # Otherwise process individually
-        return [get_ndvi(lat, lon) for lat, lon in coords]
-    except Exception as e:
-        # Implement retry or other error handling
-        return [np.nan] * len(coords)
-    
-def are_points_close(coords):
-    '''Verifies that points are close or not
-    Input: coords -> coordinates list
-    Output: True if all coordinates are within a range
-            False if not
-    '''
-    max_lat, min_lat = max([gps_tuple[0] for gps_tuple in coords]), 
-    max_lon, min_lot = max([gps_tuple[1] for gps_tuple in coords])
-    
-    pass

@@ -158,7 +158,7 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
         temp, fire_cells = get_temperature(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix, fire_location)
         print(f'Temperatura terminada')
 
-        ndvi = np.array([get_ndvi_batch(row) for row in coordinates])
+        ndvi = np.array([get_ndvi_batch(row) for row in coordinates]) # If i'm doing this, output has to be 1D
         ndvi_norm = normalizar(ndvi)
         print(f'NDVI terminado')
 

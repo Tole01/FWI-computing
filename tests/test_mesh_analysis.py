@@ -10,12 +10,17 @@ class TestMeshAnalysis(unittest.TestCase):
         # Create a dummy image (1080x1920 with 3 color channels)
         self.image = np.zeros((1080, 1920, 3), dtype=np.uint8)
         self.gps = (25.650711, -100.289578, 150)
-        self.coords = np.array([
-                                [ [r.uniform(-100.289578, -101.289578), r.uniform(25.650711, 26.650711)] for col in range(16)]
-                                    
-                                for row in range(9)
-                                    
-                                ])
+        
+        self.coords_batch_small = np.array(
+            [
+                [25.6544201, -100.29693889],
+                [25.6544201, -100.29601878],
+                [25.6544201, -100.29509866],
+                [25.6544201, -100.29417855],
+                [25.6544201, -100.29325844],
+            
+            ])
+
         self.coords_batch = np.array(
             [
     [
@@ -250,9 +255,12 @@ class TestMeshAnalysis(unittest.TestCase):
         
     def test_get_ndvi_batch(self):
         start = time.perf_counter()
+        # ndvi_batch = np.array(get_ndvi_batch(self.coords_batch_small))
         ndvi_batch = np.array([get_ndvi_batch(batch) for batch in self.coords_batch])
         print(f'get_ndvi_batch took: {time.perf_counter() - start:.6f} seconds\n')
+        print(f'The shape of the array is: {ndvi_batch.shape}\n')
         print(ndvi_batch)
+        
 
 
 
