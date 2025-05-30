@@ -1,11 +1,14 @@
-import numpy
 import math
 import ee
-import geemap
+import leafmap
 import webbrowser
 import datetime
+import folium
+import json
+from ipyleaflet import TileLayer
 
 
+# === CALCULO DEL RIESGO DE INCENDIO FORESTAL ===
 def risk_score(ndvi, slope, thermal):
 
     # Para sacar el peso individual de cada variable se sumaron sus IV's resultantes del análisis con el script de woe-data2.py
@@ -29,6 +32,7 @@ def risk_score(ndvi, slope, thermal):
     return score
 
 
+# === NIVELES DE RIESGO ===
 def visualizar_riesgo(ndvi, slope, lst_image):
     ndviWeight = 0.5142
     slopeWeight = 0.1722
@@ -39,6 +43,7 @@ def visualizar_riesgo(ndvi, slope, lst_image):
     return riesgo_img
 
 
+# === TASA DE EXPANSIÓN DEL INCENDIO FORESTAL ===
 def spread_rate(deltaH, windSpeed, slopeAng, ignitionHeat):
 
     # Asegurarse de que las variables estén en las siguientes unidades:
@@ -53,44 +58,38 @@ def spread_rate(deltaH, windSpeed, slopeAng, ignitionHeat):
     return rate
 
 
-#  === Autenticación e inicialización  ===
+# === AÑADIR CAPA DE EARTH ENGINE EN IPYLEAFLET ===
+def add_ee_layer_ipyleaflet(self, ee_object, vis_params={}, name="Layer"):
+    try:
+        if isinstance(ee_object, ee.Image):
+            map_id_dict = ee.Image(ee_object).getMapId(vis_params)
+            tile_layer = TileLayer(
+                url=map_id_dict['tile_fetcher'].url_format,
+                name=name,
+                attribution="Google Earth Engine"
+            )
+            self.add_layer(tile_layer)
+        else:
+            print("El objeto debe ser ee.Image")
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+#  === AUTENTICACIÓN E INICIALIZACIÓN EE  ===
 ee.Authenticate()
 ee.Initialize(project='light-sunup-288723')  # Usa tu ID si es diferente
 
-# Selección de coordenadas de interés
-# Rancho en Montemorelos
-# lat = float(24.878499)
-# long = float(-99.740625)
 
-# Pasadena, Los Ángeles
-# lat = float(34.156113)
-# long = float(-118.131943)
-
-# Kinneloa Mesa, California
-# lat = float(34.17701509740776)
-# long = float(-118.0868291759312)
-
-# Pasadena, California
+# === COORDENADAS DE INTERÉS ===
 lat = float(34.21113114902449)
 long = float(-118.1138591514406)
-
-# The Summit, California
-# lat = float(34.076054818186684)
-# long = float(-118.55458946947364)
-
-# Castaic Lake, California
-# lat = float(34.55273102818259)
-# long = float(-118.6082263769932)
-
-# Creación de punto geométrico
+# Creación de punto geométrico (área 10 km alrededor)
 punto = ee.Geometry.Point([long, lat])
 area = punto.buffer(10000)
 
-#  === Definición de fecha  ===
+
+#  === DEFINICIÓN DE FECHA  ===
 hoy = datetime.date.today()
-# Debido a que algunas bases de datos tienen retraso de unas semanas, se van a usar las siguientes fechas
-# inicio = '2025-04-1'
-# fin = '2025-04-30'
 gap = 29  # Días entre inicio y fin
 delay = 29  # Días de retraso en la base de datos
 fin_str = (hoy - datetime.timedelta(days=delay)).isoformat()
@@ -99,49 +98,64 @@ print(f"Fechas de análisis: {inicio_str} a {fin_str}")
 inicio = ee.Date(inicio_str)
 fin = ee.Date(fin_str)
 
-# Importar datos de NDVI
-# MODIS/061/MOD13Q1 --> Base de datos de NDVI con cadencia de 16 días
+
+# === DESCARGA DE DATOS DE VIENTO ===
+url = "https://github.com/opengeos/datasets/releases/download/raster/wind_global.nc"
+filename = "wind_global.nc"
+leafmap.download_file(url, output=filename, overwrite=True)
+data = leafmap.read_netcdf(filename)
+print(data)
+# Convierte el archivo NetCDF en TIFF para las variables de viento u y v
+tif = "wind_global.tif"
+leafmap.netcdf_to_tif(filename, tif, variables=[
+                      "u_wind", "v_wind"], shift_lon=True)
+
+
+# === IMPORTAR DATOS DE NDVI ===
 ndvi = ee.ImageCollection('MODIS/061/MOD13Q1').filterDate(inicio, fin).select(
     'NDVI').sort('system:time_start', False).mean().clip(area)
 
-# Importar datos de Temperatura de Superficie Terrestre
-# MODIS/061/MOD11A1 --> Base de dasos de Temperatura de Superficie Terrestre con cadencia de 8 días
+
+# === IMPORTAR DATOS DE TEMPERATURA DE SUPERFICIE TERRESTRE ===
 modis = ee.ImageCollection("MODIS/061/MOD11A1") \
     .filterBounds(punto) \
     .filterDate(inicio, fin) \
     .sort('system:time_start', False) \
     .first()
-# Promedio de lst y conversión a °C
+
 lst_image = modis.select('LST_Day_1km').multiply(
     0.02).subtract(273.15).rename('Temperatura_C').clip(area)
 
-# Importar datos de Velocidad del Viento
-# NOAA/GFS0P25 --> GFS: Global Forecast System Predicted Atmosphere Data con cadencia de 6 horas
+
+# === IMPORTAR DATOS DE VELOCIDAD DEL VIENTO ===
 wind_collection = ee.ImageCollection('NOAA/GFS0P25').filterDate(inicio, fin)\
     .sort('system:time_start', False).select(['u_component_of_wind_10m_above_ground', 'v_component_of_wind_10m_above_ground'])
 
-# Media de componentes U & V
 meanU = wind_collection.select('u_component_of_wind_10m_above_ground').mean()
 meanV = wind_collection.select('v_component_of_wind_10m_above_ground').mean()
-
-# Cálculo de magnitud del viendo y renombre de variable
 wind_speed = meanU.hypot(meanV).rename('WindSpeed_m/s').clip(area)
 
-# Importar datos de Pendiente
+
+# == IMPORTAR DATOS DE PENDIENTE ===
 dem = ee.Image('USGS/SRTMGL1_003')
 slope = ee.Terrain.slope(dem).rename('Pendiente_Angulo').clip(area)
 
-# Combinamos en una sola imagen
+
+# === CREAR IMAGEN COMPUESTA ===
+# Combina las bandas de NDVI, temperatura, velocidad del viento y pendiente
 imagen_completa = ndvi.rename('NDVI').addBands(
     lst_image).addBands(wind_speed).addBands(slope)
 
-# Muestreo de datos dentro del Buffer
-# (Después de crear imagen_completa)
+
+# === MUESTREO DE DATOS ===
+# Realiza un muestreo de la imagen compuesta en el área definida
 muestreo = imagen_completa.sample(
     region=area, scale=100, numPixels=100, geometries=True)
 datos = muestreo.getInfo()
 
-# Validamos si hay datos antes de continuar
+
+# === CÁLCULO DEL RIESGO DE INCENDIO FORESTAL PARA CADA MUESTRA ===
+# Validación de datos
 if not datos['features']:
     print("No se encontraron datos para las coordenadas y fechas especificadas.")
     riesgo_mapa = None
@@ -180,27 +194,59 @@ else:
             f"NDVI: {valor_ndvi}, Temp: {valor_temp} °C, Viento: {valor_wind} m/s, Pendiente: {valor_pendiente}°")
         print(f"Índice de riesgo: {riesgo_estimado:.2f}")
 
-# Se usó Geemap para crear el mapa y luego agregar los puntos
-# en base a su puntuación calculada de riesgo
-mapa_de_calor = geemap.Map(center=[lat, long], zoom=10)
 
-# Agregamos el riesgo estimado al mapa recién creado
-riesgo_vis = {'min': 900, 'max': 3300, 'palette': [
-    '00ff00', '66ff00', '99ff00', 'ccff00', 'ffff00', 'ffcc00', 'ff9900', 'ff6600', 'ff3300', 'ff0000']}  # Verde -> Rojo
-
-mapa_de_calor.addLayer(riesgo_mapa, riesgo_vis,
-                       "Índice de Riesgo de Incendio", opacity=0.85)
-mapa_de_calor.addLayer(area, {}, 'Área analizada')
-mapa_de_calor.addLayer(punto, {'color': 'blue'}, 'Punto central del incendio')
-
-mapa_de_calor.to_html('fwi-heatmap.html')
-webbrowser.open('fwi-heatmap.html')
+# === CREAR MAPA ===
+mapa_de_calor = leafmap.Map(center=(lat, long), zoom=10)
+# Extiende la clase leafmap.Map para añadir imágenes de EE
+leafmap.Map.add_ee_layer = add_ee_layer_ipyleaflet
 
 
-# Save the map as HTML
-html_file = "fwi-heatmap.html"
+# === CAPA DE VELOCIDAD DEL VIENTO ===
+# Añadir Basemap oscuro
+mapa_de_calor.add_basemap("CartoDB.DarkMatter", name="Basemap Oscuro")
+# Añadir capa de velocidad del viento
+mapa_de_calor.add_velocity(
+    filename,
+    zonal_speed="u_wind",
+    meridional_speed="v_wind",
+    color_scale=[
+        "rgb(0,0,150)",
+        "rgb(0,150,0)",
+        "rgb(255,255,0)",
+        "rgb(255,165,0)",
+        "rgb(150,0,0)",
+    ],
+    name="Velocidad del Viento",
+)
 
-# Define the color bar HTML
+
+# === CAPA DE ÍNDICE DE RIESGO ===
+riesgo_mapa = ee.Image(riesgo_mapa)  # Asignar la variable riesgo_mapa
+if riesgo_mapa is not None:
+    riesgo_vis = {
+        'min': 900,
+        'max': 3300,
+        'palette': ['00ff00', '66ff00', '99ff00', 'ccff00', 'ffff00', 'ffcc00', 'ff9900', 'ff6600', 'ff3300', 'ff0000']
+    }
+    mapa_de_calor.add_ee_layer(
+        riesgo_mapa, riesgo_vis, "Índice de Riesgo de Incendio")
+
+# Añadir geometría del área como GeoJSON
+geojson_str = json.dumps(area.getInfo())
+mapa_de_calor.add_geojson(geojson_str, layer_name="Área Seleccionada")
+
+# Añadir punto central
+mapa_de_calor.add_marker(location=(
+    lat, long), icon_color="blue", name="Punto Central")
+
+
+# === GUARDAR Y ABRIR EL MAPA EN HTML ===
+html_file = 'fwi-heatmap.html'
+mapa_de_calor.to_html(html_file)
+webbrowser.open(html_file)
+
+
+# === BARRA DE COLORES DEL ÍNDICE DE RIESGO ===
 colorbar_html = """
 <style>
     .colorbar-container {
@@ -254,71 +300,71 @@ colorbar_html = """
 </div>
 
 """
-# Append color bar to the generated HTML file
+
 with open(html_file, "r+", encoding="utf-8") as file:
     content = file.read()
     if "</body>" in content:
         content = content.replace("</body>", colorbar_html + "</body>")
     file.seek(0)
     file.write(content)
+
+# === AÑADIR SLIDER  ===
 slider_html = """
 <script>
     let map;  // Referencia global
     let bufferCircle;
 
     function waitForMap() {
-        // Esperar a que se cargue el objeto "map_0" que usa geemap
-        if (typeof window.map_0 !== 'undefined') {
-            map = window.map_0;
-
-            // Punto central
-            const lat = %f;
-            const lng = %f;
-
-            // Crear círculo inicial
-            bufferCircle = L.circle([lat, lng], {radius: 300, color: 'blue'}).addTo(map);
-
-            // Crear slider
-            const container = document.createElement('div');
-            container.innerHTML = `
-                <div style="position: absolute; top: 10px; left: 10px; z-index: 1000; background: white; padding: 10px; border: 1px solid black;">
-                    <label>Radio área analizada (m): <span id="radius-val">300</span></label><br>
-                    <input type="range" min="100" max="500" value="300" id="radius-slider" />
-                </div>
-            `;
-            document.body.appendChild(container);
-
-            // Listener del slider
-            document.getElementById('radius-slider').addEventListener('input', function(e) {
-                const newRadius = parseInt(e.target.value);
-                document.getElementById('radius-val').textContent = newRadius;
-
-                if (bufferCircle) {
-                    bufferCircle.setRadius(newRadius);
-                }
-            });
+        // Esperar a que el mapa esté listo (leaflet)
+        if (typeof window.map === 'undefined') {
+            setTimeout(waitForMap, 200);
         } else {
-            // Esperar y volver a intentar
-            setTimeout(waitForMap, 500);
+            map = window.map;
+
+            // Añadir slider
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.min = 1000;
+            slider.max = 10000;
+            slider.step = 1000;
+            slider.value = 10000;
+            slider.style.position = 'absolute';
+            slider.style.top = '10px';
+            slider.style.left = '10px';
+            slider.style.zIndex = 1000;
+            slider.title = "Cambiar radio del área de análisis";
+
+            slider.oninput = function () {
+                let radius = parseInt(this.value);
+                if (bufferCircle) {
+                    map.removeLayer(bufferCircle);
+                }
+                bufferCircle = L.circle([%(lat)f, %(lon)f], {
+                    color: 'red',
+                    fillColor: '#f03',
+                    fillOpacity: 0.1,
+                    radius: radius
+                }).addTo(map);
+            };
+
+            map.getContainer().appendChild(slider);
+
+            // Añadir círculo inicial
+            bufferCircle = L.circle([%(lat)f, %(lon)f], {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.1,
+                radius: 10000
+            }).addTo(map);
         }
     }
 
     waitForMap();
 </script>
-""" % (lat, long)
+""" % {'lat': lat, 'lon': long}
 
-# Insertarlo al HTML exportado
 with open(html_file, "r+", encoding="utf-8") as file:
     content = file.read()
-    if "</body>" in content:
-        content = content.replace("</body>", slider_html + "</body>")
+    content = content.replace("</body>", slider_html + "</body>")
     file.seek(0)
     file.write(content)
-
-print("Slider de control dinámico de radio añadido.")
-
-
-# Open the modified HTML file
-# webbrowser.open(html_file)
-
-print(f"Color bar added to {html_file}")
