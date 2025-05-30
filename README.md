@@ -42,9 +42,10 @@ Socio Formador: Green Tech Innovation (GTI)
 ## Uso
 
 1. Instala las librerías necesarias en `requirements.txt`.
-2. Ejecuta el archivo `main.py`.
-3. Espera unos minutos a que se detecte el fuego por medio de las cámaras y realice la subsecuente predicción.
-4. Cuando la aplicación se despliegue, abre tu navegador en `http://localhost:5000`.
+2. Ajusta los valores de los parámetros de acuerdo al hardware que se va a utilizar en `config.py`.
+3. Ejecuta el archivo `main.py`.
+4. Espera unos minutos a que se detecte el fuego por medio de las cámaras y realice la subsecuente predicción.
+5. Cuando la aplicación se despliegue, abre tu navegador en `http://localhost:5000`.
 
 ## Estructura del Proyecto
 
