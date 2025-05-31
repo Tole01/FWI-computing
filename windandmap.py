@@ -1,11 +1,11 @@
-import math
-import ee
-import leafmap
-import webbrowser
-import datetime
-import folium
-import json
 from ipyleaflet import TileLayer
+import json
+import folium
+import datetime
+import webbrowser
+import leafmap
+import ee
+import math
 
 
 # === CALCULO DEL RIESGO DE INCENDIO FORESTAL ===
@@ -91,7 +91,7 @@ area = punto.buffer(10000)
 #  === DEFINICIÓN DE FECHA  ===
 hoy = datetime.date.today()
 gap = 29  # Días entre inicio y fin
-delay = 29  # Días de retraso en la base de datos
+delay = 30  # Días de retraso en la base de datos
 fin_str = (hoy - datetime.timedelta(days=delay)).isoformat()
 inicio_str = (hoy - datetime.timedelta(days=delay+gap)).isoformat()
 print(f"Fechas de análisis: {inicio_str} a {fin_str}")
@@ -196,7 +196,8 @@ else:
 
 
 # === CREAR MAPA ===
-mapa_de_calor = leafmap.Map(center=(lat, long), zoom=10)
+mapa_de_calor = leafmap.Map(
+    center=(lat, long), zoom=11)
 # Extiende la clase leafmap.Map para añadir imágenes de EE
 leafmap.Map.add_ee_layer = add_ee_layer_ipyleaflet
 
@@ -243,63 +244,173 @@ mapa_de_calor.add_marker(location=(
 # === GUARDAR Y ABRIR EL MAPA EN HTML ===
 html_file = 'fwi-heatmap.html'
 mapa_de_calor.to_html(html_file)
-webbrowser.open(html_file)
 
 
-# === BARRA DE COLORES DEL ÍNDICE DE RIESGO ===
+# HTML que se insertará: colorbar + slider + lógica
 colorbar_html = """
 <style>
-    .colorbar-container {
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        width: 400px;
-        padding: 5px;
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid black;
-        z-index: 1000;
-        font-family: Arial, sans-serif;
-    }
-    .colorbar {
-        width: 100%;
-        height: 30px;
-        background: linear-gradient(to right,
-            #00ff00,
-            #66ff00,
-            #99ff00,
-            #ccff00,
-            #ffff00,
-            #ffcc00,
-            #ff9900,
-            #ff6600,
-            #ff3300,
-            #ff0000
-        );
-    }
-    .labels {
-        display: flex;
-        justify-content: space-between;
-        font-size: 10px;
-        margin-top: 4px;
-    }
+html, body, #map {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0; 
+}
+
+.leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* Spinner carga */
+#loading-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255,255,255,0.8);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    color: #333;
+}
+
+.spinner {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #3498db;
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+
+/* Contenedor colorbars */
+.colorbar-stack {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1500;
+    font-family: Arial, sans-serif;
+}
+
+/* Individual colorbar */
+.colorbar-container {
+    width: 300px;
+    padding: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid black;
+    font-size: 11px;
+}
+
+/* Barra de colores */
+.colorbar {
+    width: 100%;
+    height: 15px;
+    margin-top: 4px;
+}
+
+/* Etiquetas */
+.labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    margin-top: 2px;
+}
+
+.labels span {
+  cursor: pointer;
+  transition: color 0.3s, font-weight 0.3s;
+}
+
+.labels span:hover {
+  color: #000;
+  font-weight: bold;
+  text-shadow: 0 0 3px #555;
+}
+
+/* Gradientes */
+#wind-bar {
+    background: linear-gradient(to right,
+        rgb(0,0,150),
+        rgb(0,150,0),
+        rgb(255,255,0),
+        rgb(255,165,0),
+        rgb(150,0,0)
+    );
+}
+
+#risk-bar {
+    background: linear-gradient(to right,
+        #00ff00,
+        #66ff00,
+        #99ff00,
+        #ccff00,
+        #ffff00,
+        #ffcc00,
+        #ff9900,
+        #ff6600,
+        #ff3300,
+        #ff0000
+    );
+}
 </style>
-<div class="colorbar-container">
-    <div class="colorbar"></div>
-    <div class="labels">
-        <span>Muy bajo</span>
-        <span> </span>
-        <span>Bajo</span>
-        <span> </span>
-        <span>Moderado</span>
-        <span> </span>
-        <span>Alto</span>
-        <span> </span>
-        <span>Muy Alto</span>
-        <span> </span>
+
+<!-- Spinner Carga -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  Cargando mapa...
+</div>
+
+<!-- Leyendas colorbars -->
+<div class="colorbar-stack">
+    <!-- Velocidad del viento -->
+    <div class="colorbar-container">
+        <strong>Velocidad del Viento (m/s)</strong>
+        <div class="colorbar" id="wind-bar"></div>
+        <div class="labels">
+            <span title="0 m/s">0</span>
+            <span title="5 m/s">5</span>
+            <span title="10 m/s">10</span>
+            <span title="15 m/s">15</span>
+            <span title="20+ m/s">20+</span>
+        </div>
+    </div>
+
+    <!-- Índice de riesgo -->
+    <div class="colorbar-container">
+        <strong>Índice de Riesgo de Incendio</strong>
+        <div class="colorbar" id="risk-bar"></div>
+        <div class="labels">
+            <span title="Muy Bajo">Muy bajo</span>
+            <span title="Bajo">Bajo</span>
+            <span title="Moderado">Moderado</span>
+            <span title="Alto">Alto</span>
+            <span title="Muy Alto">Muy alto</span>
+        </div>
     </div>
 </div>
 
+<script>
+document.title = "FWI Heatmap";
+// Ocultar spinner después que la página cargue 
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    const loading = document.getElementById('loading-overlay');
+    if (loading) loading.style.display = 'none';
+  }, 2000);
+});
+</script>
 """
+
 
 with open(html_file, "r+", encoding="utf-8") as file:
     content = file.read()
@@ -308,63 +419,6 @@ with open(html_file, "r+", encoding="utf-8") as file:
     file.seek(0)
     file.write(content)
 
-# === AÑADIR SLIDER  ===
-slider_html = """
-<script>
-    let map;  // Referencia global
-    let bufferCircle;
 
-    function waitForMap() {
-        // Esperar a que el mapa esté listo (leaflet)
-        if (typeof window.map === 'undefined') {
-            setTimeout(waitForMap, 200);
-        } else {
-            map = window.map;
-
-            // Añadir slider
-            const slider = document.createElement('input');
-            slider.type = 'range';
-            slider.min = 1000;
-            slider.max = 10000;
-            slider.step = 1000;
-            slider.value = 10000;
-            slider.style.position = 'absolute';
-            slider.style.top = '10px';
-            slider.style.left = '10px';
-            slider.style.zIndex = 1000;
-            slider.title = "Cambiar radio del área de análisis";
-
-            slider.oninput = function () {
-                let radius = parseInt(this.value);
-                if (bufferCircle) {
-                    map.removeLayer(bufferCircle);
-                }
-                bufferCircle = L.circle([%(lat)f, %(lon)f], {
-                    color: 'red',
-                    fillColor: '#f03',
-                    fillOpacity: 0.1,
-                    radius: radius
-                }).addTo(map);
-            };
-
-            map.getContainer().appendChild(slider);
-
-            // Añadir círculo inicial
-            bufferCircle = L.circle([%(lat)f, %(lon)f], {
-                color: 'red',
-                fillColor: '#f03',
-                fillOpacity: 0.1,
-                radius: 10000
-            }).addTo(map);
-        }
-    }
-
-    waitForMap();
-</script>
-""" % {'lat': lat, 'lon': long}
-
-with open(html_file, "r+", encoding="utf-8") as file:
-    content = file.read()
-    content = content.replace("</body>", slider_html + "</body>")
-    file.seek(0)
-    file.write(content)
+# Abrir el HTML en el navegador
+webbrowser.open(html_file)
