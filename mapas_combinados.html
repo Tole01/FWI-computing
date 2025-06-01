@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Visualización Combinada: Riesgo de Incendio y Viento</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .map-container {
+            display: flex;
+            flex: 1;
+        }
+
+        iframe {
+            flex: 1;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        Visualización Combinada: Mapa de Riesgo de Incendio (FWI) y Dirección del Viento
+    </header>
+    <div class="map-container">
+        <iframe src="fwi-heatmap.html" title="Mapa de Riesgo de Incendio"></iframe>
+        <iframe src="windMap.html" title="Mapa de Dirección del Viento"></iframe>
+    </div>
+</body>
+
+</html>
