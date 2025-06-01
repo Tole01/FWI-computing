@@ -77,7 +77,7 @@ def add_ee_layer_ipyleaflet(self, ee_object, vis_params={}, name="Layer"):
 
 #  === AUTENTICACIÓN E INICIALIZACIÓN EE  ===
 ee.Authenticate()
-ee.Initialize(project='light-sunup-288723')  # Usa tu ID si es diferente
+ee.Initialize(project='light-sunup-288723')
 
 
 # === COORDENADAS DE INTERÉS ===
@@ -91,7 +91,7 @@ area = punto.buffer(10000)
 #  === DEFINICIÓN DE FECHA  ===
 hoy = datetime.date.today()
 gap = 29  # Días entre inicio y fin
-delay = 30  # Días de retraso en la base de datos
+delay = 32  # Días de retraso en la base de datos
 fin_str = (hoy - datetime.timedelta(days=delay)).isoformat()
 inicio_str = (hoy - datetime.timedelta(days=delay+gap)).isoformat()
 print(f"Fechas de análisis: {inicio_str} a {fin_str}")
