@@ -61,21 +61,9 @@ ee.Initialize(project='light-sunup-288723')  # Usa tu ID si es diferente
 #lat = float(34.156113)
 #long = float(-118.131943)
 
-#Kinneloa Mesa, California
-#lat = float(34.17701509740776)
-#long = float(-118.0868291759312)
-
 #Pasadena, California
 lat = float(34.21113114902449) 
 long = float(-118.1138591514406)
-
-#The Summit, California
-#lat = float(34.076054818186684)
-#long = float(-118.55458946947364)
-
-#Castaic Lake, California
-#lat = float(34.55273102818259) 
-#long = float(-118.6082263769932)
 
 #Creación de punto geométrico
 punto = ee.Geometry.Point([long,lat])
@@ -83,11 +71,9 @@ area = punto.buffer(10000)
 
 #Definición de fecha
 hoy = datetime.date.today()
-#inicio = ee.Date(str(hoy - datetime.timedelta(days=7)))
-#fin = ee.Date(str(hoy))
 #Debido a que algunas bases de datos tienen retraso de unas semanas, se van a usar las siguientes fechas
-inicio = '2021-04-1'
-fin = '2021-04-30'
+inicio = '2024-01-1'
+fin = '2024-01-31'
 
 #Importar datos de NDVI
 # MODIS/061/MOD13Q1 --> Base de datos de NDVI con cadencia de 16 días
@@ -118,6 +104,11 @@ wind_speed = meanU.hypot(meanV).rename('WindSpeed_m/s').clip(area)
 #Importar datos de Pendiente
 dem = ee.Image('USGS/SRTMGL1_003')
 slope = ee.Terrain.slope(dem).rename('Pendiente_Angulo').clip(area)
+
+#Importar datos de Incendios Históricos o de Áreas quemadas
+burnDateStart = '2025-01-01'
+burnDateEnd = '2025-01-31'
+burntZones = ee.ImageCollection("MODIS/061/MCD64A1").filterDate(burnDateStart,burnDateEnd).select("BurnDate")
 
 #Combinamos en una sola imagen
 imagen_completa = ndvi.rename('NDVI').addBands(lst_image).addBands(wind_speed).addBands(slope)
@@ -170,9 +161,11 @@ mapa_de_calor = geemap.Map(center=[lat,long], zoom = 10)
 
 #Agregamos el riesgo estimado al mapa recién creado
 riesgo_vis = {'min': 900,'max': 3300,'palette': ['00ff00', '66ff00', '99ff00', 'ccff00','ffff00','ffcc00','ff9900','ff6600','ff3300','ff0000']}  # Verde -> Rojo
+burnVis = {'min': 30.0, 'max': 341.0, 'palette': ['4e0400', '951003', 'c61503', 'ff1901']}
 
-mapa_de_calor.addLayer(riesgo_mapa,riesgo_vis, "Índice de Riesgo de Incendio", opacity=0.85)
-mapa_de_calor.addLayer(area, {},'Área analizada')
+mapa_de_calor.addLayer(riesgo_mapa,riesgo_vis, "Índice de Riesgo de Incendio", opacity=1.0)
+mapa_de_calor.addLayer(burntZones,burnVis,"Áreas Quemadas por Incendios previos")
+# mapa_de_calor.addLayer(area, {},'Área analizada')
 mapa_de_calor.addLayer(punto,{'color':'blue'},'Punto central del incendio')
 
 mapa_de_calor.to_html('fwi-heatmap.html')

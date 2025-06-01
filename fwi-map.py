@@ -286,5 +286,5 @@ print("Slider de control dinámico de radio añadido.")
 
 # Open the modified HTML file
 webbrowser.open(html_file)
-
+    
 print(f"Color bar added to {html_file}")
