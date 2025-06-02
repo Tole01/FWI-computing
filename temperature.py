@@ -7,12 +7,12 @@ from coordinates import hotspot_en_area
 
 np.random.seed(42)
 temp_array = np.random.uniform(20,25, size=(120, 160))
-#temp_array[0:10, 0:10] = 135
-#temp_array[50:60, 0:10] = 95
-#temp_array[100:110, 0:10] = 83
+temp_array[0:10, 0:10] = 135
+temp_array[50:60, 0:10] = 95
+temp_array[100:110, 0:10] = 83
 
-#temp_array[0:10, 50:60] = 129
-#temp_array[50:60, 50:60] = 92
+temp_array[0:10, 50:60] = 129
+temp_array[50:60, 50:60] = 92
 
 temp_matrix = temp_array
 

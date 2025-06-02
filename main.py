@@ -15,7 +15,7 @@ from config import FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL, FOV_TERMICA_HORIZ
 # Inicialización del proceso de detección incendio a través de cámara óptica y térmica YOLOv8
 model = YOLO(r"fire_s.pt")
 fire_img, cx, cy, fire_coordinates,hotspots,t_amb,thermal_matrix = detect_fire(model) #imagen optica, centroides de incendios
-#drone_lat,drone_lon,drone_height = get_coordinates() # Coordenadas del drone
+#drone_lat,drone_lon,drone_height = #get_coordinates() # Coordenadas del drone
 drone_lat,drone_lon,drone_height = 34.19135792863, -118.13209036525, 50 # para el ejemplo
 
 img_height, img_width = fire_img.shape[:2]

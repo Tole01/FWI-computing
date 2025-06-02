@@ -11,7 +11,7 @@ def get_coordinates():
     """
     master = mavutil.mavlink_connection(COM_ANTENA,baud = 115200) #Cambiar el puerto en caso de ser necesario
 
-    print("Esperando mensajes del dron...")
+    print("_____________________Cordenadas del Dron______________________")
     try:
         while True:
             # Recibir cualquier mensaje
