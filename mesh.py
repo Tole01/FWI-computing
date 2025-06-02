@@ -1,10 +1,11 @@
 import numpy as np
 from classes import meshCell
 from coordinates import pixel_to_gps, pixel_to_gps_vectorized
-from utils import get_weather_data, get_ndvi, get_slope, get_ndvi_batch
+from utils import get_weather_data, get_ndvi, get_slope, get_ndvi_batch, get_weather_data2
 from classes import calculate_fwi
 from temperature import get_temperature
 from utils import normalizar
+
 from config import FOV_OPTICA_HORIZONTAL,FOV_OPTICA_VERTICAL
 weights = {}
 
@@ -146,7 +147,6 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
     lon = coordinates[:, :, 1]
     
     # Vectorize all of the functions
-    get_ndvi_vectorized = np.vectorize(get_ndvi)
     get_slope_vectorized = np.vectorize(get_slope)
     get_thermal_vectorized = np.vectorize(get_temperature)
     get_weather_data_vectorized = np.vectorize(get_weather_data)
@@ -155,20 +155,27 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
     # Call API's on the input arrays
     try:
         print('__________________________API CALLS________________________________')
+
+        # Every API call is stored in an Numpy array of shape (9, 16), so that at the end arrays are stacked to form a 3D one.
+    
         temp, fire_cells = get_temperature(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix, fire_location)
         print(f'Temperatura terminada')
 
         ndvi = np.array([get_ndvi_batch(row) for row in coordinates]) # If i'm doing this, output has to be 1D
         ndvi_norm = normalizar(ndvi)
+        assert ndvi_norm.shape == (9, 16)
         print(f'NDVI terminado')
 
         slopes = get_slope_vectorized(lat, lon)
         slopes_norm = normalizar(slopes)
+        assert slopes_norm.shape == (9, 16)
         print(f'Pendiente terminado')
 
-        weather = get_weather_data_vectorized(lat, lon)
+        weather = np.array([get_weather_data2(row) for row in coordinates])
+        # weather = get_weather_data_vectorized(lat, lon)
         fwi = get_fwi_vectorized(weather)
         bui = np.vectorize(lambda array: array['BUI'], otypes=[float])(fwi)
+        assert bui.shape == (9, 16)
         print(f'BUI terminado')
         print('____________________________________________________________________')
 

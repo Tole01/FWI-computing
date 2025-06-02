@@ -8,6 +8,7 @@ from PIL import Image
 from io import BytesIO
 import math
 from multiprocessing import Pool
+from datetime import datetime
 
 # Credenciales para la API Sentinel Hub (NDVI)
 config = SHConfig()
@@ -48,6 +49,61 @@ evalscript_ndvi2 = """
             return [ndvi]
         }
         """
+
+def get_weather_data2(coordinates_row, size=16):
+    '''
+    Uses Open-Meteo Weather API to obtain the weather data for each of the mesh coordinates.
+
+    Input: coordinates_row -> 2D Numpy array of shape (16, 2) containing (lat lon) pairs of coordiantes.
+
+    Output: weather_Data -> 1D Numpy array (16, ) containing a weather dictionary
+
+    '''
+    # Open-Meteo doesn't require API key
+    url = "https://api.open-meteo.com/v1/forecast"
+
+    assert coordinates_row.shape == (size, 2), "Size of array isn't properly formatted"
+    lats = coordinates_row[:, 0]
+    lons = coordinates_row[:, 1]
+    print(f'lats: {lats}')
+    print(f'lons: {lons}')
+
+    # Set request parameters
+    params = {
+        "latitude" :  [lat for lat in lats], # 144 elements
+        "longitude" : [lon for lon in lons], # 144 elements
+        "hourly" : "temperature_2m,relative_humidity_2m,wind_speed_80m,precipitation",
+        "timezone" : "auto",
+    }
+    
+    # Generate request 
+    response = requests.get(url, params=params)
+
+    # Obtain data
+    try: 
+        data = response.json()  # Retrieve data dictionary
+    except Exception as e:
+        print('There was en error retreiving data: {e}')
+
+    # Generate array of dictionaries
+    current_hour = datetime.now().hour
+    
+    weather_data = np.array(
+         
+            [ 
+                {'t2m_C': data[i]["hourly"]["temperature_2m"][current_hour],
+                 'humedad_relativa': data[i]["hourly"]["relative_humidity_2m"][current_hour],
+                 'wind_speed_kmh': data[i]["hourly"]["wind_speed_80m"][current_hour],
+                 'precipitation_mm': data[i]["hourly"]["precipitation"][current_hour],
+                 'month': datetime.now().month} for i in range(len(lons))
+            ]
+        )
+        
+
+    assert weather_data.shape == (size, ), "Shape is incorrect"
+
+    return weather_data
+
 
 def get_weather_data(lat, lon):
     """
