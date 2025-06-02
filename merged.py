@@ -91,7 +91,7 @@ area = punto.buffer(10000)
 #  === DEFINICIÓN DE FECHA  ===
 hoy = datetime.date.today()
 gap = 29  # Días entre inicio y fin
-delay = 29  # Días de retraso en la base de datos
+delay = 30  # Días de retraso en la base de datos
 fin_str = (hoy - datetime.timedelta(days=delay)).isoformat()
 inicio_str = (hoy - datetime.timedelta(days=delay+gap)).isoformat()
 print(f"Fechas de análisis: {inicio_str} a {fin_str}")

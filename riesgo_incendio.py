@@ -9,7 +9,9 @@ import math
 import os
 
 
-# === CALCULO DEL RIESGO DE INCENDIO FORESTAL ===
+# ============= FUNCIONES =============
+
+# Cálculo del índice de riesgo de incendio forestal (FWI)
 def risk_score(ndvi, slope, thermal):
     """
     Para sacar el peso individual de cada variable se sumaron sus IV's resultantes del análisis con el script de woe-data2.py
@@ -27,41 +29,40 @@ def risk_score(ndvi, slope, thermal):
     ndviWeight = 0.5142
     slopeWeight = 0.1722
     thermalWeight = 0.3136
-
     # Conversión a °C en caso de ser necesario
     thermal = (thermal*0.2) - 273.15
-
     score = (ndvi*ndviWeight) + (slope*slopeWeight) + (thermal*thermalWeight)
     return score
 
 
-# === NIVELES DE RIESGO ===
-def visualizar_riesgo(ndvi, slope, temperatura):
+# Niveles de riesgo de incendio forestal
+def visualize_risk(ndvi, slope, temperature):
     ndviWeight = 0.5142
     slopeWeight = 0.1722
     thermalWeight = 0.3136
     # Cálculo del índice de riesgo como imagen en EE
-    riesgo_img = ndvi.multiply(ndviWeight).add(slope.multiply(slopeWeight)).add(
-        temperatura.multiply(thermalWeight)).rename("Riesgo")
-    return riesgo_img
+    risk_img = ndvi.multiply(ndviWeight).add(slope.multiply(slopeWeight)).add(
+        temperature.multiply(thermalWeight)).rename("Riesgo")
+    return risk_img
 
 
-# === TASA DE EXPANSIÓN DEL INCENDIO FORESTAL ===
-def spread_rate(deltaH, windSpeed, slopeAng, ignitionHeat):
-    """
-    Asegurarse de que las variables estén en las siguientes unidades:
-        Calor liberado por unidad -> deltaH -> kJ/m^2
-        Velocidad del viento -> windSpeed -> m/s
-        Ángulo de la pendiente -> slopeAng -> radianes
-        Calor requerido para encender la sig. unidad -> ignitionHeat -> kJ/m^2
-    """
-    # Fórmula de tasa de expansión
-    # R = dH*W*cos(theta)/Q
-    rate = (deltaH * windSpeed * math.cos(slopeAng))/ignitionHeat
-    return rate
+# Clasificación del riesgo de incendio forestal
+def classify_risk(score):
+    if score <= 1000:
+        return "Muy Bajo"
+    elif score <= 1800:
+        return "Bajo"
+    elif score <= 2200:
+        return "Moderado"
+    elif score <= 2600:
+        return "Alto"
+    elif score <= 3000:
+        return "Muy Alto"
+    else:
+        return "Extremo"
 
 
-# === AÑADIR CAPA DE EARTH ENGINE EN IPYLEAFLET ===
+# Añadir capa de Earth Engine a un mapa ipyleaflet
 def add_ee_layer_ipyleaflet(self, ee_object, vis_params={}, name="Layer"):
     try:
         if isinstance(ee_object, ee.Image):
@@ -78,61 +79,41 @@ def add_ee_layer_ipyleaflet(self, ee_object, vis_params={}, name="Layer"):
         print(f"Error: {e}")
 
 
-# === CLASIFICACIÓN DEL RIESGO DE INCENDIO FORESTAL ===
-def clasificar_riesgo(score):
-    if score <= 1000:
-        return "Muy Bajo"
-    elif score <= 1800:
-        return "Bajo"
-    elif score <= 2200:
-        return "Moderado"
-    elif score <= 2600:
-        return "Alto"
-    elif score <= 3000:
-        return "Muy Alto"
-    else:
-        return "Extremo"
-
-
-# === FECHAS DE ANÁLISIS ===
-def fecha(delay):
+# Fechas de análisis
+def date(delay):
     gap = 29
-    hoy = datetime.date.today()
-    fin_str = (hoy - datetime.timedelta(days=delay)).isoformat()
-    inicio_str = (hoy - datetime.timedelta(days=delay+gap)).isoformat()
-    print(f"Fechas de análisis: {inicio_str} a {fin_str}")
+    today = datetime.date.today()
+    end_str = (today - datetime.timedelta(days=delay)).isoformat()
+    start_str = (today - datetime.timedelta(days=delay+gap)).isoformat()
+    print(f"Fechas de análisis: {start_str} a {end_str}")
+    start = ee.Date(start_str)
+    end = ee.Date(end_str)
+    return start, end
 
-    inicio = ee.Date(inicio_str)
-    fin = ee.Date(fin_str)
-    return inicio, fin
 
-
-def obtener_ndvi(inicio, fin, area):
-    return ee.ImageCollection('MODIS/061/MOD13Q1').filterDate(inicio, fin).select(
+# Descarga de datos satelitales NDVI
+def api_ndvi(start, end, area):
+    return ee.ImageCollection('MODIS/061/MOD13Q1').filterDate(start, end).select(
         'NDVI').sort('system:time_start', False).mean().clip(area)
 
 
-def obtener_temperatura(inicio, fin, punto, area):
+# Descarga de datos satelitales de temperatura
+def api_temp(start, end, point, area):
     modis = ee.ImageCollection("MODIS/061/MOD11A1").filterBounds(
-        punto).filterDate(inicio, fin).sort('system:time_start', False).first()
-
+        point).filterDate(start, end).sort('system:time_start', False).first()
     return modis.select('LST_Day_1km').multiply(
         0.02).subtract(273.15).rename('Temperatura_C').clip(area)
 
 
-def wind_data(url, filename, tif):
-    if not os.path.exists(tif):
-        leafmap.download_file(url, output=filename, overwrite=True)
-        # data = leafmap.read_netcdf(filename)
-        # print(data)
-
-        # Convierte el archivo NetCDF en TIFF para las variables de viento u y v
-        leafmap.netcdf_to_tif(filename, tif, variables=[
-                              "u_wind", "v_wind"], shift_lon=True)
+# Descarga de datos satelitales de pendiente
+def api_slope(area):
+    dem = ee.Image('USGS/SRTMGL1_003')
+    return ee.Terrain.slope(dem).rename('Pendiente_Angulo').clip(area)
 
 
-def api_wind(inicio, fin, area):
-    wind_collection = ee.ImageCollection('NOAA/GFS0P25').filterDate(inicio, fin).sort('system:time_start', False).select([
+# Descarga de datos satelitales del viento
+def api_wind(start, end, area):
+    wind_collection = ee.ImageCollection('NOAA/GFS0P25').filterDate(start, end).sort('system:time_start', False).select([
         'u_component_of_wind_10m_above_ground', 'v_component_of_wind_10m_above_ground'])
     meanU = wind_collection.select(
         'u_component_of_wind_10m_above_ground').mean()
@@ -141,68 +122,63 @@ def api_wind(inicio, fin, area):
     return meanU.hypot(meanV).rename('WindSpeed_m/s').clip(area)
 
 
-def api_slope(area):
-    dem = ee.Image('USGS/SRTMGL1_003')
-    return ee.Terrain.slope(dem).rename('Pendiente_Angulo').clip(area)
+# Descarga de datos de viento
+def wind_data(url, filename, tif):
+    if not os.path.exists(tif):
+        leafmap.download_file(url, output=filename, overwrite=True)
+        # data = leafmap.read_netcdf(filename)
+        # print(data)
+        # Convierte el archivo NetCDF en TIFF para las variables de viento u y v
+        leafmap.netcdf_to_tif(filename, tif, variables=[
+                              "u_wind", "v_wind"], shift_lon=True)
 
 
-#  === AUTENTICACIÓN E INICIALIZACIÓN EE  ===
+#  ============= AUTENTICACIÓN E INICIALIZACIÓN =============
 ee.Authenticate()
 ee.Initialize(project='light-sunup-288723')
 
-
-# === COORDENADAS DE INTERÉS ===
+# Coordenadas del área de estudio
 lat = float(34.21113114902449)
 long = float(-118.1138591514406)
+
 # Creación de punto geométrico (área 10 km alrededor)
-punto = ee.Geometry.Point([long, lat])
-area = punto.buffer(10000)
+point = ee.Geometry.Point([long, lat])
+area = point.buffer(10000)
 
+# Fecha
+start, end = date(delay=33)
 
-#  === DEFINICIÓN DE FECHA  ===
-inicio, fin = fecha(delay=32)
+# ============= IMPORTAR DATOS =============
+# APIs
+ndvi = api_ndvi(start, end, area)
+temperature = api_temp(start, end, point, area)
+wind_speed = api_wind(start, end, area)
+slope = api_slope(area)
 
-
-# === DESCARGA DE DATOS DE VIENTO ===
+# Datos del viento
 url = "https://github.com/opengeos/datasets/releases/download/raster/wind_global.nc"
 filename = "wind_global.nc"
 tif = "wind_global.tif"
 wind_data(url, filename, tif)
 
+# Imagen compuesta: Combina las bandas de NDVI, temperatura, velocidad del viento y pendiente
+full_img = ndvi.rename('NDVI').addBands(
+    temperature).addBands(wind_speed).addBands(slope)
 
-# === IMPORTAR DATOS DE NDVI ===
-ndvi = obtener_ndvi(inicio, fin, area)
-
-# === IMPORTAR DATOS DE TEMPERATURA DE SUPERFICIE TERRESTRE ===
-temperatura = obtener_temperatura(inicio, fin, punto, area)
-
-# === IMPORTAR DATOS DE VELOCIDAD DEL VIENTO ===
-wind_speed = api_wind(inicio, fin, area)
-
-# == IMPORTAR DATOS DE PENDIENTE ===
-slope = api_slope(area)
-
-# === CREAR IMAGEN COMPUESTA ===
-# Combina las bandas de NDVI, temperatura, velocidad del viento y pendiente
-imagen_completa = ndvi.rename('NDVI').addBands(
-    temperatura).addBands(wind_speed).addBands(slope)
-
-
-# === MUESTREO DE DATOS ===
-# Realiza un muestreo de la imagen compuesta en el área definida
-muestreo = imagen_completa.sample(
+# Muestreo de la imagen compuesta en el área definida
+sampling = full_img.sample(
     region=area, scale=100, numPixels=100, geometries=True)
-datos = muestreo.getInfo()
+data = sampling.getInfo()
 
 
-# === CÁLCULO DEL RIESGO DE INCENDIO FORESTAL PARA CADA MUESTRA ===
+# ============= CÁLCULO DEL RIESGO DE INCENDIO FORESTAL =============
 # Validación de datos
-if not datos['features']:
+if not data['features']:
     print("No se encontraron datos para las coordenadas y fechas especificadas.")
-    riesgo_mapa = None
+    risk_map = None
 else:
-    riesgo_mapa = visualizar_riesgo(ndvi, slope, temperatura)
-    for feature in datos['features']:
+    risk_map = visualize_risk(ndvi, slope, temperature)
+    for feature in data['features']:
         props = feature['properties']
         coords = feature['geometry']['coordinates']
 
@@ -210,33 +186,27 @@ else:
         valor_wind = props['WindSpeed_m/s']
         valor_temp = props['Temperatura_C']
         valor_pendiente = props['Pendiente_Angulo']
-
         valor_pendiente_rad = math.radians(valor_pendiente)
 
         riesgo_estimado = risk_score(
             valor_ndvi, valor_pendiente_rad, valor_temp)
+        nivel = classify_risk(riesgo_estimado)
 
-        nivel = clasificar_riesgo(riesgo_estimado)
-
-        print(f"Índice de riesgo: {riesgo_estimado:.2f} ({nivel})")
-        print(f"Coordenadas: {coords}")
-        print(
-            f"NDVI: {valor_ndvi}, Temp: {valor_temp} °C, Viento: {valor_wind} m/s, Pendiente: {valor_pendiente}°")
-        print(f"Índice de riesgo: {riesgo_estimado:.2f}")
+        # print(f"Índice de riesgo: {riesgo_estimado:.2f} ({nivel})")
+        # print(f"Coordenadas: {coords}")
+        # print(f"NDVI: {valor_ndvi}, Temp: {valor_temp} °C, Viento: {valor_wind} m/s, Pendiente: {valor_pendiente}°")
+        # print(f"Índice de riesgo: {riesgo_estimado:.2f}")
 
 
-# === CREAR MAPA ===
-mapa_de_calor = leafmap.Map(
-    center=(lat, long), zoom=11)
+# ============= CREAR MAPA =============
+heat_map = leafmap.Map(center=(lat, long), zoom=11)
 # Extiende la clase leafmap.Map para añadir imágenes de EE
 leafmap.Map.add_ee_layer = add_ee_layer_ipyleaflet
 
-
-# === CAPA DE VELOCIDAD DEL VIENTO ===
+# Capa de velocidad del viento
 # Añadir Basemap oscuro
-mapa_de_calor.add_basemap("CartoDB.DarkMatter", name="Basemap Oscuro")
-# Añadir capa de velocidad del viento
-mapa_de_calor.add_velocity(
+heat_map.add_basemap("CartoDB.DarkMatter", name="Basemap Oscuro")
+heat_map.add_velocity(
     filename,
     zonal_speed="u_wind",
     meridional_speed="v_wind",
@@ -250,33 +220,31 @@ mapa_de_calor.add_velocity(
     name="Velocidad del Viento",
 )
 
-
-# === CAPA DE ÍNDICE DE RIESGO ===
-riesgo_mapa = ee.Image(riesgo_mapa)  # Asignar la variable riesgo_mapa
-if riesgo_mapa is not None:
+# Capa del indice de riesgo de incendio
+risk_map = ee.Image(risk_map)
+if risk_map is not None:
     riesgo_vis = {
         'min': 900,
         'max': 3300,
         'palette': ['00ff00', '66ff00', '99ff00', 'ccff00', 'ffff00', 'ffcc00', 'ff9900', 'ff6600', 'ff3300', 'ff0000']
     }
-    mapa_de_calor.add_ee_layer(
-        riesgo_mapa, riesgo_vis, "Índice de Riesgo de Incendio")
+    heat_map.add_ee_layer(
+        risk_map, riesgo_vis, "Índice de Riesgo de Incendio")
 
 # Añadir geometría del área como GeoJSON
 geojson_str = json.dumps(area.getInfo())
-mapa_de_calor.add_geojson(geojson_str, layer_name="Área Seleccionada")
+heat_map.add_geojson(geojson_str, layer_name="Área Seleccionada")
 
 # Añadir punto central
-mapa_de_calor.add_marker(location=(
-    lat, long), icon_color="blue", name="Punto Central")
+heat_map.add_marker(location=(lat, long),
+                    icon_color="blue", name="Punto Central")
 
 
-# === GUARDAR Y ABRIR EL MAPA EN HTML ===
-html_file = 'fwi-heatmap.html'
-mapa_de_calor.to_html(html_file)
+# ============= GUARDAR Y ABRIR EL MAPA EN HTML =============
+html_file = 'fwi-heatmap.html'  # Nombre del archivo HTML
+heat_map.to_html(html_file)
 
-
-# HTML que se insertará: colorbar + slider + lógica
+# HTML que se insertará colorbars
 colorbar_html = """
 <style>
 html, body, #map {
@@ -441,14 +409,13 @@ window.addEventListener('load', function() {
 </script>
 """
 
-
+# Añadir las colorbars al archivo HTML
 with open(html_file, "r+", encoding="utf-8") as file:
     content = file.read()
     if "</body>" in content:
         content = content.replace("</body>", colorbar_html + "</body>")
     file.seek(0)
     file.write(content)
-
 
 # Abrir el HTML en el navegador
 webbrowser.open(html_file)
