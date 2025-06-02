@@ -12,9 +12,9 @@ from datetime import datetime
 
 # Credenciales para la API Sentinel Hub (NDVI)
 config = SHConfig()
-config.sh_client_id = '590548f9-918d-4f36-83ad-e36f60cdb9b2'
-config.sh_client_secret = 'PNvCEtDi7XxbE6dSOqBrnQaGhjgaG1k4'
-config.instance_id = '013ae883-0246-47b8-8fb6-8de30e43ec3f'
+config.sh_client_id = 'fda7dccb-da21-4e14-9ee2-edbc46678486'
+config.sh_client_secret = 'OV6hcplnH0GJlwfP2Cx6KwYxb01J93or'
+config.instance_id = '0761f443-a1b1-44da-b274-b58436d5056d'
 
 # Evalscript para NDVI
 evalscript_ndvi = """
