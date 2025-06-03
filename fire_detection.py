@@ -19,7 +19,7 @@ def detect_fire(model, fire = 0):
         fire_coordinates: Lista de tuplas que contienen la coordenada (cx, cy) del centro del fuego
     """
     model = YOLO(r"fire_s.pt") #Modelo de deteccion entrenado
-    cap = cv2.VideoCapture(0)  # Ajustar a cámara correspondiente
+    cap = cv2.VideoCapture(1)  # Ajustar a cámara correspondiente
     if not cap.isOpened():
         print("No se pudo abrir la cámara.")
         exit()
@@ -32,14 +32,14 @@ def detect_fire(model, fire = 0):
         if not ret:
             print("No se pudo leer el frame de la cámara.")
             break
-        
-        thermal_matrix = temp_matrix #get_temp_matrix() # Obtener temperatura 120X160
-        hotspots, t_amb = detectar_hotspots(thermal_matrix)
-        cx, cy = hotspots[-1] if hotspots.size > 0 else (None, None) # Coordenadas del último hotspot detectado
+        if frame_count % 15 == 0:
+            thermal_matrix = get_temp_matrix() #temp_matrix# Obtener temperatura 120X160
+            hotspots, t_amb = detectar_hotspots(thermal_matrix)
+            cx, cy = hotspots[-1] if hotspots.size > 0 else (None, None) # Coordenadas del último hotspot detectado
 
         # Ejecutar inferencia cada 3 frames
-        if frame_count % 3 == 0:
-            frame = cv2.imread(r'firetest11.jpg') #ejemplo se borra
+        if frame_count % 1 == 0:
+            #frame = cv2.imread(r'firetest11.jpg') #ejemplo se borra
             resized_frame = cv2.resize(frame, (640, 360))
             results = model(frame, conf=0.45)[0] #resultados de YOLO en el frame
             annotated_frame = results.plot()

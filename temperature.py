@@ -62,7 +62,7 @@ def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix,
     fire_cells = np.array(fire_cells)
     return temp_array,fire_cells
 
-def get_temp_matrix(puerto=COM_ESP, baudios=115200, timeout=20):
+def get_temp_matrix(puerto=COM_ESP, baudios=115200, timeout=30):
     try:
         ser = serial.Serial(puerto, baudios, timeout=1)
     except serial.SerialException as e:
@@ -122,9 +122,13 @@ def detectar_hotspots(matriz_temp, tamano_minimo=5):
     - temperatura ambiente calculada como la mediana de la matriz.
     """
     # Calcular la temperatura ambiente como la mediana de la matriz
-    temp_ambiente = np.median(matriz_temp)
+    try:
+        temp_ambiente = np.median(matriz_temp)
+    except TypeError as e:
+        print(f"Error al calcular la temperatura ambiente: {e}")
+        quit()
 
-    margen = .8* temp_ambiente
+    margen = 1.25* temp_ambiente
 
     # Crear una máscara binaria donde las temperaturas superan el umbral
     mascara = matriz_temp > (temp_ambiente + margen)
