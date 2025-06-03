@@ -58,7 +58,6 @@ def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix,
             if fire_cells_loc:
                 cx, cy = col, row
                 fire_cells.append((cy, cx))
-                print(f'fire cell: {cy, cx}')
     
     fire_cells = np.array(fire_cells)
     return temp_array,fire_cells

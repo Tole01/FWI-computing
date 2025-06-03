@@ -65,8 +65,6 @@ def get_weather_data2(coordinates_row, size=16):
     assert coordinates_row.shape == (size, 2), "Size of array isn't properly formatted"
     lats = coordinates_row[:, 0]
     lons = coordinates_row[:, 1]
-    print(f'lats: {lats}')
-    print(f'lons: {lons}')
 
     # Set request parameters
     params = {

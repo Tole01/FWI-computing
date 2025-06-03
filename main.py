@@ -118,5 +118,7 @@ def geojson():
     print("🛰️ Sirviendo:", os.path.abspath("riesgo.geojson"))
     return send_from_directory(".", "riesgo.geojson")
 
+print("Para ver el mapa 3D agregar '/3d' al final de la URL")
+
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
