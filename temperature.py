@@ -5,17 +5,6 @@ import numpy as np
 from scipy.ndimage import label, center_of_mass
 from coordinates import hotspot_en_area
 
-np.random.seed(42)
-temp_array = np.random.uniform(20,25, size=(120, 160))
-temp_array[0:10, 0:10] = 135
-temp_array[50:60, 0:10] = 95
-temp_array[100:110, 0:10] = 83
-
-temp_array[0:10, 50:60] = 129
-temp_array[50:60, 50:60] = 92
-
-temp_matrix = temp_array
-
 def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix, fire_location):
 
     temp_array = np.empty((coordinates.shape[0], coordinates.shape[1]), dtype=np.float32)
@@ -62,7 +51,7 @@ def get_temperature(coordinates, hotspots,hotspot_location,t_amb,thermal_matrix,
     fire_cells = np.array(fire_cells)
     return temp_array,fire_cells
 
-def get_temp_matrix(puerto=COM_ESP, baudios=115200, timeout=30):
+def get_temp_matrix(puerto=COM_ESP, baudios=115200, timeout=60):
     try:
         ser = serial.Serial(puerto, baudios, timeout=1)
     except serial.SerialException as e:

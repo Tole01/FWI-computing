@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from fire_detection import detect_fire
 from mesh import mesh_segmentation2
-from display import NNI_kernel, colorear_celdas, crop_optical_to_thermal
+from display import NNI_kernel, colorear_celdas
 from ultralytics import YOLO
 from coordinates import pixel_to_gps
 from geojson_gen import generar_geojson
@@ -15,8 +15,7 @@ from config import FOV_OPTICA_HORIZONTAL, FOV_OPTICA_VERTICAL, FOV_TERMICA_HORIZ
 # Inicialización del proceso de detección incendio a través de cámara óptica y térmica YOLOv8
 model = YOLO(r"fire_s.pt")
 fire_img, cx, cy, fire_coordinates,hotspots,t_amb,thermal_matrix = detect_fire(model) #imagen optica, centroides de incendios
-#drone_lat,drone_lon,drone_height = #get_coordinates() # Coordenadas del drone
-drone_lat,drone_lon,drone_height = 34.19135792863, -118.13209036525, 50 # para el ejemplo
+drone_lat,drone_lon,drone_height = get_coordinates() # Coordenadas del drone
 
 img_height, img_width = fire_img.shape[:2]
 print(f"Imagen óptica capturada: {img_height}x{img_width} píxeles")
