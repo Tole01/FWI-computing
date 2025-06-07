@@ -1,5 +1,5 @@
 import unittest
-from utils import get_weather_data, get_ndvi, get_slope, get_weather_data2
+from utils import get_weather_data, get_ndvi, get_slope, get_weather_data2, get_slope2
 import timeit, time, numpy as np
 
 
@@ -69,6 +69,11 @@ class Test_APIfunctions(unittest.TestCase):
         print(weather_data.shape)
         # print(weather_data.shape)
 
+    def test_get_slope(self):
+        start = time.perf_counter()
+        slope = get_slope(self.lat, self.lon)
+        print(f'\nGet slope function took: {time.perf_counter() - start:.6f} seconds')
+        print(f'Slope value:', slope)
 
 
 if __name__ == "__main__":

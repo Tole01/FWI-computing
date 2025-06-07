@@ -72,13 +72,6 @@ def mesh_segmentation(image, drone_lat, drone_lon, height_m, hotspots,hotspot_lo
 def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t_amb, thermal_matrix, fire_location, x_columns = 16, y_rows = 9):
     '''
     Generates the mesh analysis from the image taken by the optical camera. 
-
-    Input:
-
-
-    Output:
-
-
     '''
     # Generate GPS coordinates mesh
     coords = generate_coordinates(image, x_columns, y_rows, d_lat, d_lon, d_height)
@@ -94,9 +87,6 @@ def mesh_segmentation2(image, d_lat, d_lon, d_height,hotspots,hotspot_location,t
     result = np.stack((lats,lons, risk), axis=-1)
 
     return risk,result, fire_cells
-
-
-    # Compute indices / Call API's from coords
 
 
 
@@ -148,8 +138,6 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
     
     # Vectorize all of the functions
     get_slope_vectorized = np.vectorize(get_slope)
-    get_thermal_vectorized = np.vectorize(get_temperature)
-    get_weather_data_vectorized = np.vectorize(get_weather_data)
     get_fwi_vectorized = np.vectorize(calculate_fwi)
 
     # Call API's on the input arrays
@@ -172,7 +160,6 @@ def compute_indices(coordinates, hotspots,hotspot_location,t_amb, thermal_matrix
         print(f'Pendiente terminado')
 
         weather = np.array([get_weather_data2(row) for row in coordinates])
-        # weather = get_weather_data_vectorized(lat, lon)
         fwi = get_fwi_vectorized(weather)
         bui = np.vectorize(lambda array: array['BUI'], otypes=[float])(fwi)
         assert bui.shape == (9, 16)

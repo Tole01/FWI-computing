@@ -232,7 +232,9 @@ def get_slope(lat, lon):
     MAPBOX_TOKEN = 'pk.eyJ1IjoiamFjb2JvMjciLCJhIjoiY204eW5maTdjMDMwODJqb293ZGd4cTNscSJ9.0_kcUB4XbYyrw3PPGT-QuQ'
     ZOOM = 17  # Quieres mayor o menor resolución
     x_tile, y_tile = latlon_to_tilexy(lat, lon, ZOOM)
+    print(x_tile, y_tile)
     image = get_tile_image(x_tile, y_tile, ZOOM, MAPBOX_TOKEN)
+    print(image)
     pixels = np.array(image)
     tile_size = pixels.shape[0]
     center = tile_size // 2
@@ -255,6 +257,37 @@ def get_slope(lat, lon):
     slope_normalized = slope_deg / 90.0  # Normalizar entre 0 y 1
 
     return slope_normalized
+
+def get_slope2(coordinates_row, size=16):
+    '''Computes the slope of a coordinate point by calculating with a gradient from its neighbors'
+    
+    Input: coordinates_row -> 2D Numpy Array of shape (16, 2)
+
+    Output: slopes -> 1D Numpy array of shape (16, )
+
+    '''
+    assert coordinates_row.shape[1] == 2, "Coordinates must be in pairs"
+    
+    url = "https://maps.googleapis.com/maps/api/elevation/json"
+    # api_key = reemplazar por la API obtenida de Google Cloud.
+
+    # Define request parameters
+    params = {
+                "locations": "|".join([f"{lat},{lon}" for lat, lon in coordinates_row]),
+                "key": None
+    }
+
+    response = requests.get(url, params=params)
+
+    try: 
+        data = response.json()
+        print(data)
+    except Exception as e:
+        print(f'There was an error fetching JSON data: {e}')
+
+    return None
+
+    
 
 
 def get_ndvi_batch(coordinates, delta_lat=0.0008):
